@@ -1,4 +1,4 @@
-# 📄 Document de Cadrage : Jeu de Devinette Temporelle (*Chronos Game*)
+# 📄 Document de Cadrage : Jeu de Devinette Temporelle (*Guess The Date*)
 
 ## 1. Objectifs du Projet
 
@@ -18,7 +18,7 @@
 ### 2.1 Spécifications Techniques
 * **Format** : Application Web Front-End légère (HTML5, CSS3, JavaScript ES6 Vanilla).
 * **Compatibilité** : Responsive Design (Desktop, Tablette, Smartphone) et support des navigateurs modernes.
-* **Stockage des données** : Base de données locale ou fichier structuré (`JSON`) contenant la liste des objets (titre, année, URL d'image, siècle, auteur/inventeur, type de licence).
+* **Stockage des données** : Appel à une API (TBD: https://apidocs.cooperhewitt.org/the-api/, https://www.wikidata.org/wiki/Wikidata:Main_Page) pour récupérer la liste des objets (titre, année, URL d'image, siècle, auteur/inventeur, type de licence) + base de données (stockage des scores, inforations supplémentaires sur les objets)
 
 ### 2.2 Composants de l'Interface Utilisateur (UI)
 1. **Zone Médias** : Affichage central de l'image de l'objet à deviner avec crédits d'auteur/source.
