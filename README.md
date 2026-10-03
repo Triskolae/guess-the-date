@@ -249,7 +249,7 @@ cd ..
  Exemple :
 
 ```
-PORT=3000
+PORT=3001
 ```
 
  Le fichier `.env` contient potentiellement des informations sensibles et ne doit jamais être versionné.
@@ -282,7 +282,7 @@ npm start
  Le serveur sera accessible à l'adresse :
 
 ```
-http://localhost:3000
+http://localhost:3001
 ```
 
  ### 8.2 Lancement global en développement
@@ -321,13 +321,13 @@ npm run dev
 npm run dev
      │
      ├── Backend
-     │     └── Node.js / Express ──> http://localhost:3000
+     │     └── Node.js / Express ──> http://localhost:3001
      │
      └── Frontend
-           └── BrowserSync ─────────> http://localhost:3001
+           └── BrowserSync ─────────> http://localhost:3000
 ```
 
- > **Note :** BrowserSync utilise Express comme serveur proxy. L'adresse à ouvrir dans le navigateur sera généralement `http://localhost:3001`.
+ > **Note :** BrowserSync utilise Express comme serveur proxy. L'adresse à ouvrir dans le navigateur sera généralement `http://localhost:3000`.
 
  ### 9.3 Fichiers surveillés
 
@@ -369,7 +369,7 @@ npm run dev
 const express = require("express");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 
@@ -481,7 +481,7 @@ frontend/public/
  Exemple de communication avec le Back-End via `fetch()` :
 
 ```
-const response = await fetch("http://localhost:3000/api/game/object");
+const response = await fetch("http://localhost:3001/api/game/object");
 const object = await response.json();
 ```
 
@@ -581,8 +581,8 @@ npm run dev
 
  Accès :
 
- - **Front-End avec BrowserSync :** `http://localhost:3001`
-- **Back-End Express :** `http://localhost:3000`
+- **Front-End avec BrowserSync :** `http://localhost:3000`
+- **Back-End Express :** `http://localhost:3001`
 
  Le serveur de développement doit être lancé depuis la **racine du projet**.
 
