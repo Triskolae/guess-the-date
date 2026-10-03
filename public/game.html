@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta
+      name="description"
+      content="Guess the Date game. Guess when the mystery object was created."
+    />
+
+    <title>Play | Guess the Date</title>
+
+    <link rel="stylesheet" href="assets/style.css" />
+  </head>
+
+  <body>
+    <main class="main">
+
+      <section class="game">
+        <h1>Guess the Date</h1>
+
+        <div id="legend" aria-label="Guess proximity">
+          <div>🥳 Correct</div>
+          <div>🔥 Within 25 years</div>
+          <div>🥵 Within 50 years</div>
+          <div>😎 Within 75 years</div>
+          <div>🥶 Within 100 years</div>
+          <div>🧊 More than 100 years away</div>
+        </div>
+
+        <form id="answer-form">
+          <img
+            src="assets/img/gramophone.png"
+            alt="Gramophone"
+          />
+
+          <p>When was this object created?</p>
+
+          <label for="user-answer">Your answer</label>
+
+          <input
+            type="number"
+            name="user-answer"
+            id="user-answer"
+            placeholder="Enter a year"
+            required
+          />
+
+          <button type="submit">Submit</button>
+
+          <div id="feedback" aria-live="polite"></div>
+
+          <div id="hints" aria-live="polite"></div>
+        </form>
+      </section>
+
+    </main>
+
+    <script src="assets/main.js"></script>
+  </body>
+</html>

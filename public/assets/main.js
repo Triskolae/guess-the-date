@@ -15,8 +15,8 @@ form.addEventListener("submit", (event) => {
   const answer = 1887;
 
   if (userAnswer === answer) {
-    feedback.innerHTML = `&#x1F973; C\'est gagnééé ! <a href="https://fr.wikipedia.org/wiki/Gramophone"
-      target="_blank">Découvrir cette invention</a>`;
+    feedback.innerHTML = `&#x1F973; You got it! <a href="https://en.wikipedia.org/wiki/Gramophone"
+      target="_blank">Learn more about this invention</a>`;
     return;
   }
 
@@ -25,7 +25,7 @@ form.addEventListener("submit", (event) => {
   }
 
   if (userTries >= 3) {
-    hints.innerText += "XIXe siècle\n";
+    hints.innerText += "19th century\n";
   }
 
   switch (true) {
@@ -42,7 +42,7 @@ form.addEventListener("submit", (event) => {
       feedback.innerHTML = "&#x1F976;";
       break;
     default:
-      feedback.innerHTML = "&#x1F9CA; Houlà t'es loiiiiiin...";
+      feedback.innerHTML = "&#x1F9CA; You're way off!";
       break;
   }
 });
