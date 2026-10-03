@@ -76,232 +76,359 @@ Pour éviter le blocage du joueur, des indices se débloquent progressivement :
 
 ## 4. Architecture Technique
 
-### 4.1 Structure du Projet
-L'arborescence cible du projet est la suivante :
+ Le projet est organisé en **monorepo** : le Front-End et le Back-End sont conservés dans le même repository GitHub, mais sont séparés dans deux dossiers distincts.
 
-```text
+```
 guess-the-date/
-├── public/
-│   ├── index.html
-│   └── assets/
-│       ├── main.js
-│       ├── style.css
-│       └── img/
-│           ├── gramophone.png
-│           └── uranium.jpg
+├── frontend/
+│   └── public/
+│       ├── index.html
+│       └── assets/
+│           ├── main.js
+│           ├── style.css
+│           └── img/
+│               ├── gramophone.png
+│               └── uranium.jpg
 │
-├── src/
-│   ├── routes/
-│   ├── controllers/
-│   ├── services/
-│   └── data/
+├── backend/
+│   ├── src/
+│   │   ├── routes/
+│   │   ├── controllers/
+│   │   ├── services/
+│   │   └── data/
+│   ├── server.js
+│   ├── package.json
+│   └── package-lock.json
 │
-├── .env.example
-├── .gitignore
 ├── package.json
 ├── package-lock.json
-├── server.js
+├── .env.example
+├── .gitignore
 └── README.md
 ```
 
-#### Dossier `public/`
-Contient les ressources accessibles par le navigateur :
-* HTML ;
-* CSS ;
-* JavaScript côté client ;
-* Images ;
-* Autres ressources statiques.
+ #### Dossier `frontend/`
 
-#### Dossier `src/`
-Contient la logique côté serveur. Les sous-dossiers sont organisés comme suit :
-* `routes/` : Les routes HTTP.
-* `controllers/` : Les contrôleurs.
-* `services/` : La logique métier.
-* `data/` : L'accès aux données.
+ Contient uniquement les ressources du Front-End accessibles par le navigateur :
 
-*Note : Au début du projet, ces dossiers peuvent rester vides si aucune fonctionnalité ne les nécessite encore.*
+ - HTML ;
+- CSS ;
+- JavaScript côté client ;
+- Images ;
+- Autres ressources statiques.
 
-#### Fichier `server.js`
-Point d'entrée du serveur Express. Responsabilités initiales :
-* Démarrer le serveur HTTP ;
-* Servir les fichiers statiques présents dans `public/` ;
-* Exposer les futures routes de l'API ;
-* Gérer la configuration du serveur.
+ Le Front-End n'utilise actuellement **aucun framework JavaScript**.
+
+ #### Dossier `backend/`
+
+ Contient le serveur Node.js et toute la logique côté serveur :
+
+ - `server.js` : point d'entrée du serveur Express ;
+- `src/routes/` : routes HTTP/API ;
+- `src/controllers/` : contrôleurs ;
+- `src/services/` : logique métier ;
+- `src/data/` : accès et traitement des données ;
+- `package.json` : dépendances propres au Back-End.
+
+ Les futures fonctionnalités temps réel pourront utiliser **Socket.IO** côté Back-End.
+
+ #### `package.json` racine
+
+ Le `package.json` situé à la racine est utilisé principalement pour orchestrer le développement local et lancer simultanément le Front-End et le Back-End.
+
+ #### Déploiement
+
+ Le monorepo pourra être déployé sur plusieurs services :
+
+```
+                         GitHub
+                           │
+             ┌─────────────┴─────────────┐
+             │                           │
+       frontend/                    backend/
+             │                           │
+          Vercel                      Render
+             │                           │
+        Front-End                 API Express
+                                     │
+                              Socket.IO / BDD
+```
+
+ Le Front-End et le Back-End restent donc dans un **seul repository**, tout en pouvant être déployés indépendamment.
 
 ---
 
 ## 5. Prérequis
 
-### 5.1 Node.js
-Le projet nécessite une version récente de Node.js (il est recommandé d'utiliser une version LTS).
+ ### 5.1 Node.js
 
-https://nodejs.org/fr/download
+ Le projet nécessite une version récente de Node.js (il est recommandé d'utiliser une version LTS).
 
-Vérifier l'installation :
-```bash
+ https://nodejs.org/fr/download
+
+ Vérifier l'installation :
+
+```
 node --version
 npm --version
 ```
 
-### 5.2 Git
-Git est nécessaire pour récupérer le projet et gérer les versions.
+ ### 5.2 Git
 
-Vérifier l'installation :
-```bash
+ Git est nécessaire pour récupérer le projet et gérer les versions.
+
+ Vérifier l'installation :
+
+```
 git --version
 ```
+
+ ### 5.3 Organisation des dépendances
+
+ Le projet utilise deux `package.json` distincts :
+
+```
+guess-the-date/
+├── package.json          ← outils de développement / orchestration
+│
+├── frontend/
+│   └── public/           ← HTML / CSS / JS vanilla
+│
+└── backend/
+    ├── package.json      ← dépendances du serveur
+    └── server.js
+```
+
+ Les dépendances du Back-End doivent être installées depuis le dossier `backend/`.
+
+ Les outils de développement communs comme `concurrently` et `browser-sync` sont installés à la racine.
+
 
 ---
 
 ## 6. Installation en Local
 
-### 6.1 Cloner le projet
-Depuis le terminal :
-```bash
+ ### 6.1 Cloner le projet
+
+ Depuis le terminal :
+
+```
 git clone <URL_DU_REPOSITORY>
 cd guess-the-date
 ```
-*(Remplacer `<URL_DU_REPOSITORY>` par l'URL réelle du dépôt Git).*
 
-### 6.2 Installer les dépendances
-Installer les dépendances Node.js avec :
-```bash
+ _(Remplacer `<URL_DU_REPOSITORY>` par l'URL réelle du dépôt Git)._
+
+ ### 6.2 Installer les dépendances
+
+ Installer les dépendances de développement à la racine :
+
+```
 npm install
 ```
-Cette commande utilise le fichier `package.json` et installe les dépendances dans le dossier `node_modules/`.
 
-> ⚠️ Le dossier `node_modules/` est ignoré par Git et ne doit pas être versionné.
+ Puis installer les dépendances du Back-End :
 
+```
+cd backend
+npm install
+cd ..
+```
+
+ Cette organisation permet à chaque partie du projet de conserver ses propres dépendances.
+
+ > ⚠️ Les dossiers `node_modules/` sont ignorés par Git et ne doivent pas être versionnés.
 ---
 
 ## 7. Configuration du Projet
 
-### 7.1 Variables d'environnement
-Les variables d'environnement sont stockées dans un fichier `.env` à la racine du projet.
+ ### 7.1 Variables d'environnement
 
-Exemple :
-```env
-PORT=3000
+ Les variables d'environnement du Back-End sont stockées dans un fichier `.env` situé dans le dossier `backend/`.
+
+ Exemple :
+
 ```
-*(Le fichier `.env` contient potentiellement des informations sensibles et ne doit jamais être versionné).*
-
-### 7.2 File `.env.example`
-Un fichier `.env.example` doit être présent dans le repository afin de documenter les variables nécessaires.
-
-Créer le fichier `.env` à partir du modèle d'exemple :
-```bash
-cp .env.example .env
+PORT=3001
 ```
-*(Sous Windows, le fichier peut également être créé manuellement).*
+
+ Le fichier `.env` contient potentiellement des informations sensibles et ne doit jamais être versionné.
+
+ ### 7.2 Fichier `.env.example`
+
+ Un fichier `backend/.env.example` doit être présent dans le repository afin de documenter les variables nécessaires.
+
+ Créer le fichier `.env` à partir du modèle d'exemple :
+
+```
+cp backend/.env.example backend/.env
+```
+
+ _(Sous Windows, le fichier peut également être créé manuellement)._
 
 ---
 
 ## 8. Lancement du Projet
 
-### 8.1 Lancement simple
-Le serveur Express peut être lancé directement avec :
-```bash
-node server.js
-```
-Le serveur sera accessible à l'adresse : `http://localhost:3000` (ou le port configuré dans le `.env`).
+ ### 8.1 Lancement simple du Back-End
 
-### 8.2 Scripts npm
-Le `package.json` doit contenir au minimum les scripts suivants :
-```json
-{
-  "scripts": {
-    "start": "node server.js",
-    "dev": "concurrently \"node --watch server.js\" \"browser-sync start --proxy localhost:3000 --files 'public/**/*'\""
-  }
-}
+ Le serveur Express peut être lancé depuis le dossier `backend/` :
+
+```
+cd backend
+npm start
 ```
 
-Outils utilisés :
-* `node --watch` : Redémarre automatiquement le serveur à la modification du code Back-End.
-* `browser-sync` : Recharge automatiquement le navigateur à la modification des fichiers Front-End.
-* `concurrently` : Lance les deux processus simultanément.
+ Le serveur sera accessible à l'adresse :
+
+```
+http://localhost:3001
+```
+
+ ### 8.2 Lancement global en développement
+
+ Depuis la racine du projet :
+
+```
+npm run dev
+```
+
+ Le script racine démarre simultanément le serveur Back-End et BrowserSync pour le Front-End.
 
 ---
 
 ## 9. Live Reload
 
-### 9.1 Installation des dépendances de dev
-```bash
+ ### 9.1 Installation des dépendances de développement
+
+ Depuis la racine :
+
+```
 npm install --save-dev concurrently browser-sync
 ```
 
-### 9.2 Lancement en mode développement
-```bash
+ ### 9.2 Lancement en mode développement
+
+ Depuis la racine du projet :
+
+```
 npm run dev
 ```
 
-Architecture d'exécution :
-```text
+ Architecture d'exécution :
+
+```
 npm run dev
      │
-     ├── Node.js / Express ──> http://localhost:3000
+     ├── Backend
+     │     └── Node.js / Express ──> http://localhost:3001
      │
-     └── BrowserSync ────────> http://localhost:3001
+     └── Frontend
+           └── BrowserSync ─────────> http://localhost:3000
 ```
 
-> **Note :** BrowserSync utilise Express comme serveur proxy. L'adresse à ouvrir dans le navigateur sera généralement `http://localhost:3001`.
+ > **Note :** BrowserSync utilise Express comme serveur proxy. L'adresse à ouvrir dans le navigateur sera généralement `http://localhost:3000`.
 
-### 9.3 Fichiers surveillés
-* Fichiers Front-End surveillés par BrowserSync :
-  * `public/index.html`
-  * `public/assets/main.js`
-  * `public/assets/style.css`
-  * `public/assets/img/*`
-* Fichiers Back-End surveillés par Node :
-  * `node --watch server.js`
+ ### 9.3 Fichiers surveillés
+
+ Fichiers Front-End surveillés par BrowserSync :
+
+```
+frontend/public/index.html
+frontend/public/assets/main.js
+frontend/public/assets/style.css
+frontend/public/assets/img/*
+```
+
+ Fichiers Back-End surveillés par `node --watch` :
+
+```
+backend/server.js
+```
+
+ ### 9.4 Où exécuter les commandes ?
+
+ Pour le développement complet :
+
+```
+cd guess-the-date
+npm run dev
+```
+
+ Il n'est pas nécessaire de lancer `npm run dev` depuis `backend/` lorsque le script d'orchestration racine est utilisé.
 
 ---
 
 ## 10. Serveur Express
 
-Configuration minimale initiale pour servir les fichiers statiques du dossier `public/` :
+ Le serveur Express se trouve désormais dans `backend/server.js`.
 
-```javascript
+ Configuration minimale initiale :
+
+```
 const express = require("express");
-const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
 
 app.listen(PORT, () => {
-  console.log(`Guess The Date running on http://localhost:${PORT}`);
+  console.log(`Guess The Date API running on http://localhost:${PORT}`);
 });
 ```
+
+ Le Front-End est désormais séparé du serveur Express et sera servi indépendamment en production.
+
+ Le Back-End expose principalement les futures routes de l'API et les fonctionnalités temps réel.
 
 ---
 
 ## 11. API Backend
 
-L'API permettra progressivement de déplacer la logique du jeu côté serveur.
+ L'API est développée dans le dossier `backend/`.
 
-### Exemple d'organisation future :
-```text
-src/
-├── routes/
-│   └── game.routes.js
-├── controllers/
-│   └── game.controller.js
-├── services/
-│   └── game.service.js
-└── data/
-    └── objects.js
+ ### Organisation actuelle/future :
+
+```
+backend/
+├── server.js
+├── package.json
+└── src/
+    ├── routes/
+    │   └── game.routes.js
+    ├── controllers/
+    │   └── game.controller.js
+    ├── services/
+    │   └── game.service.js
+    └── data/
+        └── objects.js
 ```
 
-### Endpoints envisagés :
-* `GET /api/game`
-* `GET /api/game/object`
-* `POST /api/game/guess`
-* `GET /api/game/hint`
-* `POST /api/scores`
-* `GET /api/scores`
+ ### Endpoints envisagés :
+
+ - `GET /api/game`
+- `GET /api/game/object`
+- `POST /api/game/guess`
+- `GET /api/game/hint`
+- `POST /api/scores`
+- `GET /api/scores`
+
+ ### Temps réel
+
+ Le mode multijoueur pourra utiliser **Socket.IO** pour gérer les communications temps réel entre les deux joueurs et le serveur.
+
+ Exemples de fonctionnalités concernées :
+
+ - création d'une partie ;
+- association de deux joueurs à une même partie ;
+- synchronisation du chronomètre ;
+- transmission des réponses ;
+- mise à jour des scores ;
+- fin de partie ;
+- synchronisation de l'objet actuellement affiché.
+
+ La communication classique avec l'API REST restera adaptée aux opérations qui ne nécessitent pas de temps réel.
 
 ---
 
@@ -334,16 +461,31 @@ Deux sources principales sont envisagées :
 
 ## 13. Front-End
 
-Le Front-End est actuellement développé sans framework en **HTML5**, **CSS3** et **JavaScript ES6+**.
+ Le Front-End est développé sans framework en **HTML5**, **CSS3** et **JavaScript ES6+**.
 
-* **Fichier JS principal :** `public/assets/main.js`
-* **Feuille de style :** `public/assets/style.css`
+ Les fichiers sont situés dans :
 
-Exemple de communication avec le serveur via `fetch()` :
-```javascript
-const response = await fetch("/api/game/object");
+```
+frontend/public/
+├── index.html
+└── assets/
+    ├── main.js
+    ├── style.css
+    └── img/
+```
+
+ - **Fichier HTML principal :** `frontend/public/index.html`
+- **Fichier JS principal :** `frontend/public/assets/main.js`
+- **Feuille de style :** `frontend/public/assets/style.css`
+
+ Exemple de communication avec le Back-End via `fetch()` :
+
+```
+const response = await fetch("http://localhost:3001/api/game/object");
 const object = await response.json();
 ```
+
+ En production, l'URL de l'API sera configurée selon le domaine du Back-End déployé.
 
 ---
 
@@ -374,91 +516,130 @@ Plages d'évaluation :
 
 ## 16. Développement
 
-Pendant le développement, les fichiers principalement édités sont :
-* `public/index.html`
-* `public/assets/main.js`
-* `public/assets/style.css`
-* `server.js`
+ Pendant le développement, les fichiers principalement édités sont :
 
-Les modifications sont détectées automatiquement grâce à `npm run dev`.
+```
+frontend/public/index.html
+frontend/public/assets/main.js
+frontend/public/assets/style.css
+backend/server.js
+```
+
+ Les modifications sont détectées automatiquement grâce à :
+
+```
+npm run dev
+```
+
+ Le développement est orchestré depuis la **racine du projet**.
 
 ---
 
 ## 17. Gestion de Version (Git)
 
-### 17.1 Fichiers à versionner
-* `public/`
-* `src/`
-* `server.js`
-* `package.json`
-* `package-lock.json`
-* `README.md`
-* `.gitignore`
-* `.env.example`
+ ### 17.1 Fichiers à versionner
 
-### 17.2 Fichiers à ignorer (`.gitignore`)
-* `node_modules/`
-* `.env`
-* `*.log`
-* Fichiers temporaires
-* Bases de données locales
+ - `frontend/`
+- `backend/src/`
+- `backend/server.js`
+- `backend/package.json`
+- `backend/package-lock.json`
+- `package.json`
+- `package-lock.json`
+- `README.md`
+- `.gitignore`
+- `backend/.env.example`
+
+ ### 17.2 Fichiers à ignorer (`.gitignore`)
+
+ - `node_modules/`
+- `.env`
+- `*.log`
+- Fichiers temporaires
+- Bases de données locales
 
 ---
 
 ## 18. Installation Rapide
 
-Pour un nouveau développeur :
-```bash
+ Pour un nouveau développeur :
+
+```
 git clone <URL_DU_REPOSITORY>
 cd guess-the-date
+
 npm install
-cp .env.example .env
+
+cd backend
+npm install
+cd ..
+
+cp backend/.env.example backend/.env
+
 npm run dev
 ```
 
-Accès :
-* **BrowserSync (recommandé pour dev) :** `http://localhost:3001`
-* **Serveur Express direct :** `http://localhost:3000`
+ Accès :
+
+- **Front-End avec BrowserSync :** `http://localhost:3000`
+- **Back-End Express :** `http://localhost:3001`
+
+ Le serveur de développement doit être lancé depuis la **racine du projet**.
 
 ---
 
 ## 19. Évolutions Prévues
 
-* [ ] Mise en place complète de l'API Express.
-* [ ] Récupération automatique des objets depuis Wikidata et/ou Cooper Hewitt.
-* [ ] Normalisation et validation des données.
-* [ ] Stockage des objets dans une base de données.
-* [ ] Persistance des scores.
-* [ ] Gestion de sessions et parties.
-* [ ] Génération aléatoire des objets.
-* [ ] System de gestion avancée des indices.
-* [ ] Authentification des joueurs.
-* [ ] Tests automatisés.
-* [ ] Déploiement en production.
+- [ ] Mise en place complète de l'API Express.
+- [ ] Récupération automatique des objets depuis Wikidata et/ou Cooper Hewitt.
+- [ ] Normalisation et validation des données.
+- [ ] Mise en place d'une base de données distante.
+- [ ] Persistance des scores.
+- [ ] Gestion de sessions et parties.
+- [ ] Génération aléatoire des objets.
+- [ ] Système de gestion avancée des indices.
+- [ ] Mise en place du multijoueur temps réel avec Socket.IO.
+- [ ] Synchronisation de deux joueurs dans une même partie.
+- [ ] Chronomètre et état de partie synchronisés côté serveur.
+- [ ] Authentification des joueurs.
+- [ ] Tests automatisés.
+- [ ] Déploiement du Front-End sur Vercel.
+- [ ] Déploiement du Back-End sur Render.
 
 ---
 
 ## 20. État Actuel du Projet & Migration MVP
 
-Le projet est au stade de **MVP**. Le Front-End existant dans `mvp/` doit être migré vers `public/`.
+ Le projet est au stade de **MVP**. Le Front-End existant est désormais organisé dans `frontend/public/` et le serveur dans `backend/`.
 
-### Migration des dossiers :
-```text
-Ancienne structure:               Nouvelle structure target:
-.                                 guess-the-date/
-├── guess-the-date                ├── public/
-└── mvp                           │   ├── index.html
-    ├── assets                    │   └── assets/
-    │   ├── img                   │       ├── main.js
-    │   │   ├── gramophone.png     │       ├── style.css
-    │   │   └── uranium.jpg       │       └── img/
-    │   ├── main.js               ├── src/
-    │   └── style.css             ├── .env.example
-    └── index.html                ├── server.js
-                                  └── ...
+ ### Structure actuelle :
+
+```
+guess-the-date/
+├── frontend/
+│   └── public/
+│       ├── index.html
+│       └── assets/
+│           ├── main.js
+│           ├── style.css
+│           └── img/
+│               ├── gramophone.png
+│               └── uranium.jpg
+│
+├── backend/
+│   ├── src/
+│   ├── server.js
+│   ├── package.json
+│   └── package-lock.json
+│
+├── package.json
+├── package-lock.json
+├── .env.example
+├── .gitignore
+└── README.md
 ```
 
-Une fois la migration effectuée, le dossier `mvp/` sera supprimé.
+ Le projet utilise un **monorepo GitHub**. Les deux parties peuvent être développées et versionnées ensemble tout en étant déployées séparément.
 
 ### Flux cible de l'application :
 ```text
@@ -470,11 +651,12 @@ Browser ──> Frontend (HTML/CSS/JS) ──(HTTP/JSON)──> Express/Node.js 
 ## 21. Aide-Mémoire : Commandes Utiles
 
 | Action | Commande |
-| :--- | :--- |
-| **Installer les dépendances** | `npm install` |
+| --- | --- |
+| **Installer les dépendances racine** | `npm install` |
+| **Installer les dépendances Back-End** | `cd backend && npm install` |
 | **Ajouter les dev-dependencies** | `npm install --save-dev concurrently browser-sync` |
-| **Démarrer en production** | `npm start` |
-| **Démarrer en dev (Live Reload)** | `npm run dev` |
+| **Démarrer le Back-End** | `cd backend && npm start` |
+| **Démarrer le projet en dev** | `npm run dev` |
 | **Vérifier Node / npm** | `node --version` / `npm --version` |
 | **Statut Git** | `git status` |
 | **Commit & Push rapide** | `git add . && git commit -m "feat: setup" && git push` |
