@@ -75,15 +75,21 @@ Pour éviter le blocage du joueur, des indices se débloquent progressivement :
 ---
 
 ## 4. Architecture Technique
+Le projet est structuré en **Monorepo** :
 
- Le projet est organisé en **monorepo** : le Front-End et le Back-End sont conservés dans le même repository GitHub, mais sont séparés dans deux dossiers distincts.
-
-```
+```text
 guess-the-date/
 ├── frontend/
 │   └── public/
+│       ├── about.html
+│       ├── account.html
+│       ├── badges.html
+│       ├── game.html
 │       ├── index.html
+│       ├── login.html
+│       ├── settings.html
 │       └── assets/
+│           ├── config.js         ← Fichier d'URL d'API dynamique
 │           ├── main.js
 │           ├── style.css
 │           └── img/
@@ -97,12 +103,12 @@ guess-the-date/
 │   │   ├── services/
 │   │   └── data/
 │   ├── server.js
+│   ├── Dockerfile                ← Configuration de build Docker (Northflank)
 │   ├── package.json
 │   └── package-lock.json
 │
-├── package.json
+├── package.json                  ← Orchestration dev locale
 ├── package-lock.json
-├── .env.example
 ├── .gitignore
 └── README.md
 ```
@@ -111,7 +117,7 @@ guess-the-date/
 
  Contient uniquement les ressources du Front-End accessibles par le navigateur :
 
- - HTML ;
+- HTML ;
 - CSS ;
 - JavaScript côté client ;
 - Images ;
@@ -141,17 +147,16 @@ guess-the-date/
  Le monorepo pourra être déployé sur plusieurs services :
 
 ```
-                         GitHub
+                        GitHub
                            │
              ┌─────────────┴─────────────┐
              │                           │
-       frontend/                    backend/
+     frontend/public/                backend/
              │                           │
-          Vercel                      Render
+      Cloudflare Pages               Northflank (Docker)
+   (Static CDN Host)             (Node.js + WebSockets)
              │                           │
-        Front-End                 API Express
-                                     │
-                              Socket.IO / BDD
+             └────────── HTTP / WS ──────┴────── Database (Supabase PostgreSQL)
 ```
 
  Le Front-End et le Back-End restent donc dans un **seul repository**, tout en pouvant être déployés indépendamment.
@@ -660,3 +665,27 @@ Browser ──> Frontend (HTML/CSS/JS) ──(HTTP/JSON)──> Express/Node.js 
 | **Vérifier Node / npm** | `node --version` / `npm --version` |
 | **Statut Git** | `git status` |
 | **Commit & Push rapide** | `git add . && git commit -m "feat: setup" && git push` |
+
+## 22. Procédure de Déploiement
+
+### 8.1 Base de données (Supabase)
+
+Base PostgreSQL créée sur Supabase.
+
+Chaîne de connexion injectée via la variable DATABASE_URL sur Northflank.
+
+### 8.2 Back-End (Northflank)
+
+Déploiement via le Dockerfile situé dans /backend/Dockerfile.
+
+Variables d'environnement configurées : PORT, DATABASE_URL, FRONTEND_URL.
+
+Règle CORS activée pour accepter les requêtes originaires du domaine Cloudflare.
+
+### 8.3 Front-End (Cloudflare Pages)
+
+Connecté au dépôt GitHub.
+
+Build output directory : frontend/public.
+
+Build command : (Vide).
