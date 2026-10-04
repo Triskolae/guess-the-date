@@ -1,0 +1,12 @@
+{
+  "name": "guess-the-date",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"browser-sync start --server frontend/public --files 'frontend/public/**/*' --port 3000\""
+  },
+  "devDependencies": {
+    "browser-sync": "^3.0.4",
+    "concurrently": "^10.0.5"
+  }
+}

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta
+      name="description"
+      content="Log in to Guess the Date or create a new account."
+    />
+
+    <title>Log in | Guess the Date</title>
+
+    <link rel="stylesheet" href="assets/style.css" />
+  </head>
+
+  <body>
+    <header class="site-header">
+      <a href="index.html" class="site-logo"> Guess the Date </a>
+
+      <nav class="main-nav" aria-label="Main navigation">
+        <ul>
+          <li>
+            <a href="game.html">Play</a>
+          </li>
+          <li>
+            <a href="about.html">About</a>
+          </li>
+          <li>
+            <a href="login.html" aria-current="page">Log in</a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="auth-page">
+      <section class="auth-introduction">
+        <h1>Welcome to Guess the Date</h1>
+
+        <p>
+          Log in to access your account, or create one to keep track of your
+          progress and achievements.
+        </p>
+      </section>
+
+      <div class="auth-container">
+        <section class="auth-section login-section">
+          <h2>Log in</h2>
+
+          <form class="auth-form" id="login-form">
+            <div class="form-field">
+              <label for="login-email">Email</label>
+              <input
+                type="email"
+                id="login-email"
+                name="email"
+                autocomplete="email"
+                required
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="login-password">Password</label>
+              <input
+                type="password"
+                id="login-password"
+                name="password"
+                autocomplete="current-password"
+                required
+              />
+            </div>
+
+            <button type="submit" class="button button-primary">Log in</button>
+          </form>
+        </section>
+
+        <section class="auth-section signup-section">
+          <h2>Create an account</h2>
+
+          <form class="auth-form" id="signup-form">
+            <div class="form-field">
+              <label for="signup-username">Username</label>
+              <input
+                type="text"
+                id="signup-username"
+                name="username"
+                autocomplete="username"
+                required
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="signup-email">Email</label>
+              <input
+                type="email"
+                id="signup-email"
+                name="email"
+                autocomplete="email"
+                required
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="signup-password">Password</label>
+              <input
+                type="password"
+                id="signup-password"
+                name="password"
+                autocomplete="new-password"
+                required
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="signup-password-confirmation">
+                Confirm password
+              </label>
+              <input
+                type="password"
+                id="signup-password-confirmation"
+                name="password-confirmation"
+                autocomplete="new-password"
+                required
+              />
+            </div>
+
+            <button type="submit" class="button button-primary">
+              Create account
+            </button>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <nav aria-label="Footer navigation">
+        <a href="about.html">About</a>
+      </nav>
+
+      <p>Guess the Date</p>
+    </footer>
+
+    <script src="assets/config.js"></script>
+  </body>
+</html>
