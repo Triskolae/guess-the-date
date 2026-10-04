@@ -1,3 +1,9 @@
+// Requêtes HTTP REST
+const response = await fetch(`${window.API_URL}/api/health`);
+
+// Connexion WebSockets (Socket.IO)
+const socket = io(window.API_URL);
+
 const form = document.getElementById("answer-form");
 const feedback = document.getElementById("feedback");
 const hints = document.getElementById("hints");
