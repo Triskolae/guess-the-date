@@ -1,8 +1,19 @@
 // Requêtes HTTP REST
-const response = await fetch(`${window.API_URL}/api/health`);
+fetch(`${window.API_URL}/api/health`)
+  .then((response) => {
+    if (!response.ok) {
+      console.error("API health check failed");
+    }
+  })
+  .catch((error) => {
+    console.error("API unavailable:", error);
+  });
 
 // Connexion WebSockets (Socket.IO)
-const socket = io(window.API_URL);
+// Only initialise Socket.IO when the client library is available.
+if (typeof io !== "undefined") {
+  const socket = io(window.API_URL);
+}
 
 const form = document.getElementById("answer-form");
 const feedback = document.getElementById("feedback");
