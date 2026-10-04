@@ -43,31 +43,14 @@ let timelineMaxYear = DEFAULT_TIMELINE_MAX_YEAR;
 
 // Temporary data used to test the game loop.
 // This will later be replaced by data coming from the API/database.
-const LOCAL_GAME_OBJECTS = [
-  {
-    id: "gramophone",
-    name: "Gramophone",
-    year: 1887,
-    image: "assets/img/gramophone.png",
-    rarity: "common",
-    themes: ["art-culture", "technology"],
-    sourceUrl: "https://en.wikipedia.org/wiki/Gramophone",
-  },
-  {
-    id: "uranium",
-    name: "Uranium",
-    year: 1789,
-    image: "assets/img/uranium.jpg",
-    rarity: "uncommon",
-    themes: ["science"],
-    sourceUrl: "https://en.wikipedia.org/wiki/Uranium",
-  },
-];
 
-let gameObjects = LOCAL_GAME_OBJECTS;
+let gameObjects = [];
 
 function useLocalGameObjects() {
-  gameObjects = LOCAL_GAME_OBJECTS;
+  gameObjects = LOCAL_GAME_OBJECTS
+    .map(normalizeGameObject)
+    .filter(Boolean);
+
   currentObjectIndex = 0;
 
   console.info("Using local development game objects.");
@@ -81,6 +64,22 @@ function getCurrentObject() {
   return gameObjects[currentObjectIndex];
 }
 
+function normalizeGameObject(object) {
+  if (!object || typeof object !== "object") {
+    return null;
+  }
+
+  return {
+    id: object.id ?? null,
+    name: object.name ?? null,
+    year: object.year ?? null,
+    image: object.image ?? null,
+    rarity: object.rarity ?? null,
+    themes: Array.isArray(object.themes) ? object.themes : [],
+    sourceUrl: object.sourceUrl ?? null,
+  };
+}
+
 function setGameObjects(objects) {
   if (!Array.isArray(objects) || objects.length === 0) {
     console.warn(
@@ -91,7 +90,20 @@ function setGameObjects(objects) {
     return false;
   }
 
-  gameObjects = objects;
+  const normalizedObjects = objects
+    .map(normalizeGameObject)
+    .filter(Boolean);
+
+  if (normalizedObjects.length === 0) {
+    console.warn(
+      "No valid game objects received. Falling back to local development data.",
+    );
+
+    useLocalGameObjects();
+    return false;
+  }
+
+  gameObjects = normalizedObjects;
   currentObjectIndex = 0;
 
   return true;
@@ -681,5 +693,7 @@ nextObjectButton.addEventListener("click", () => {
 
   resetRound();
 });
+
+setGameObjects(LOCAL_GAME_OBJECTS);
 
 resetRound();
