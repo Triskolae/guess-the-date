@@ -43,7 +43,7 @@ let timelineMaxYear = DEFAULT_TIMELINE_MAX_YEAR;
 
 // Temporary data used to test the game loop.
 // This will later be replaced by data coming from the API/database.
-const objects = [
+const LOCAL_GAME_OBJECTS = [
   {
     id: "gramophone",
     name: "Gramophone",
@@ -54,22 +54,47 @@ const objects = [
     sourceUrl: "https://en.wikipedia.org/wiki/Gramophone",
   },
   {
-  id: "uranium",
-  name: "Uranium",
-  year: 1789,
-  image: "assets/img/uranium.jpg",
-  rarity: "uncommon",
-  themes: ["science"],
-  sourceUrl: "https://en.wikipedia.org/wiki/Uranium",
+    id: "uranium",
+    name: "Uranium",
+    year: 1789,
+    image: "assets/img/uranium.jpg",
+    rarity: "uncommon",
+    themes: ["science"],
+    sourceUrl: "https://en.wikipedia.org/wiki/Uranium",
   },
 ];
+
+let gameObjects = LOCAL_GAME_OBJECTS;
+
+function useLocalGameObjects() {
+  gameObjects = LOCAL_GAME_OBJECTS;
+  currentObjectIndex = 0;
+
+  console.info("Using local development game objects.");
+}
 
 let currentObjectIndex = 0;
 let userTries = 0;
 let roundFinished = false;
 
 function getCurrentObject() {
-  return objects[currentObjectIndex];
+  return gameObjects[currentObjectIndex];
+}
+
+function setGameObjects(objects) {
+  if (!Array.isArray(objects) || objects.length === 0) {
+    console.warn(
+      "No game objects received. Falling back to local development data.",
+    );
+
+    useLocalGameObjects();
+    return false;
+  }
+
+  gameObjects = objects;
+  currentObjectIndex = 0;
+
+  return true;
 }
 
 function getHistoricalPeriod(year) {
@@ -652,7 +677,7 @@ form.addEventListener("submit", (event) => {
 
 nextObjectButton.addEventListener("click", () => {
   currentObjectIndex =
-    (currentObjectIndex + 1) % objects.length;
+    (currentObjectIndex + 1) % gameObjects.length;
 
   resetRound();
 });
