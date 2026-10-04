@@ -90,6 +90,7 @@
             class="game-hints"
             aria-live="polite"
           ></div>
+
           <button
             type="button"
             id="next-object"
@@ -98,33 +99,33 @@
           >
             Next object
           </button>
-          
-          <div id="legend" class="game-legend">
-          <div>🥳 Correct</div>
-          <div>🔥 1–24 years away — Burning</div>
-          <div>🥵 25–49 years away — Hot</div>
-          <div>😎 50–79 years away — Warm</div>
-          <div>🥶 80–99 years away — Cold</div>
-          <div>🧊 100+ years away — Freezing</div>
-        </div>
         </form>
 
         <section class="timeline-section" aria-labelledby="timeline-title">
           <h2 id="timeline-title">Timeline</h2>
 
           <div class="timeline">
-            <div class="timeline-labels">
-              <span class="timeline-start">Past</span>
-              <span class="timeline-end">Present</span>
+
+            <!-- Temporary labels used to test timeline positioning -->
+            <div class="timeline-labels" aria-hidden="true">
+              <span>← Past</span>
+              <span>Present →</span>
             </div>
 
             <div class="timeline-track">
+              <div
+                id="timeline-ticks"
+                class="timeline-ticks"
+                aria-hidden="true"
+              ></div>
+
               <div
                 id="timeline-cursor"
                 class="timeline-cursor"
                 aria-hidden="true"
               ></div>
             </div>
+
           </div>
         </section>
 
@@ -133,11 +134,11 @@
 
           <div id="legend" class="game-legend">
             <div>🥳 Correct</div>
-            <div>🔥 Within 25 years</div>
-            <div>🥵 Within 50 years</div>
-            <div>😎 Within 75 years</div>
-            <div>🥶 Within 100 years</div>
-            <div>🧊 More than 100 years away</div>
+            <div>🔥 1–24 years away — Burning</div>
+            <div>🥵 25–49 years away — Hot</div>
+            <div>😎 50–79 years away — Warm</div>
+            <div>🥶 80–99 years away — Cold</div>
+            <div>🧊 100+ years away — Freezing</div>
           </div>
         </aside>
 
@@ -154,4 +155,4 @@
 
     <script src="assets/main.js"></script>
   </body>
-</html> 
+</html>
