@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run dev --prefix backend\" \"browser-sync start --server frontend/public --files 'frontend/public/**/*' --port 3000\""
+    "dev": "concurrently \"npm run dev --prefix backend\" \"browser-sync start --server frontend/public --files 'frontend/public/**/*' --port 3000 --ui-port 3002\""
   },
   "devDependencies": {
     "browser-sync": "^3.0.4",
