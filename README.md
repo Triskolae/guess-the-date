@@ -819,6 +819,8 @@ FRONTEND_URL.
 Règle CORS activée pour accepter les requêtes originaires du domaine
 Cloudflare.
 
+Via Northflank (Recommandé) : Exécuter npm run migrate:prod directement depuis le terminal / la console de ton conteneur Northflank.
+
 ### 22.3 Front-End (Cloudflare Pages)
 
 Connecté au dépôt GitHub.

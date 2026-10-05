@@ -1,17 +1,18 @@
 const path = require('path');
+const dns = require('dns');
 
-const envFile = process.env.NODE_ENV === 'staging' || process.argv.includes('staging') 
-  ? '.env_preprod' 
-  : '.env';
+// Force l'IPv4 pour éviter les erreurs de résolution ENETUNREACH avec Supabase
+dns.setDefaultResultOrder('ipv4first');
 
-require('dotenv').config({ path: path.resolve(__dirname, envFile) });
-require('dotenv').config({ path: path.resolve(__dirname, '..', envFile) });
+// Charge le fichier .env unique (local) s'il existe
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
 const getDbConfig = () => {
   const password = process.env.DB_PASSWORD || process.env.POSTGRES_PASSWORD;
 
   if (!password) {
-    console.error(`❌ ERREUR: DB_PASSWORD est introuvable. Variables chargées: DB_HOST=${process.env.DB_HOST}`);
+    console.error(`❌ ERREUR: DB_PASSWORD introuvable pour DB_HOST=${process.env.DB_HOST}`);
   }
 
   if (process.env.DB_HOST) {
@@ -32,6 +33,7 @@ const getDbConfig = () => {
 };
 
 module.exports = {
+  // Développement local (pointe vers le schéma "preprod" via backend/.env)
   development: {
     client: 'pg',
     connection: getDbConfig(),
@@ -40,6 +42,8 @@ module.exports = {
       directory: './src/database/migrations'
     }
   },
+
+  // Environnement de Staging/Preprod
   staging: {
     client: 'pg',
     connection: getDbConfig(),
@@ -49,6 +53,7 @@ module.exports = {
     }
   },
 
+  // Production (sur Northflank : lira les variables de Prod du Cloud & ciblera "public")
   production: {
     client: 'pg',
     connection: getDbConfig(),
