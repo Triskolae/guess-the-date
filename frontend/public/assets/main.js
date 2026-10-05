@@ -28,6 +28,8 @@ const nextObjectButton = document.getElementById("next-object");
 const timelineCursor = document.getElementById("timeline-cursor");
 const timelineTicks = document.getElementById("timeline-ticks");
 
+const objectImageFallback = document.getElementById("object-image-fallback");
+
 const DEFAULT_TIMELINE_MIN_YEAR = -3000;
 const DEFAULT_TIMELINE_MAX_YEAR = new Date().getFullYear();
 
@@ -41,27 +43,122 @@ let timelineMaxYear = DEFAULT_TIMELINE_MAX_YEAR;
 
 // Temporary data used to test the game loop.
 // This will later be replaced by data coming from the API/database.
-const objects = [
-  {
-    name: "Gramophone",
-    year: 1887,
-    image: "assets/img/gramophone.png",
-    link: "https://en.wikipedia.org/wiki/Gramophone",
-  },
-  {
-    name: "Uranium",
-    year: 1789,
-    image: "assets/img/uranium.jpg",
-    link: "https://en.wikipedia.org/wiki/Uranium",
-  },
-];
+
+let gameObjects = [];
+
+function useLocalGameObjects() {
+  gameObjects = LOCAL_GAME_OBJECTS
+    .map(normalizeGameObject)
+    .filter(Boolean);
+
+  currentObjectIndex = 0;
+
+  console.info("Using local development game objects.");
+}
 
 let currentObjectIndex = 0;
 let userTries = 0;
 let roundFinished = false;
 
 function getCurrentObject() {
-  return objects[currentObjectIndex];
+  return gameObjects[currentObjectIndex];
+}
+
+function normalizeGameObject(object) {
+  if (!object || typeof object !== "object") {
+    return null;
+  }
+
+  return {
+    id: object.id ?? null,
+    name: object.name ?? null,
+    year: object.year ?? null,
+    image: object.image ?? null,
+    rarity: object.rarity ?? null,
+    themes: Array.isArray(object.themes) ? object.themes : [],
+    sourceUrl: object.sourceUrl ?? null,
+  };
+}
+
+function setGameObjects(objects) {
+  if (!Array.isArray(objects) || objects.length === 0) {
+    console.warn(
+      "No game objects received. Falling back to local development data.",
+    );
+
+    useLocalGameObjects();
+    return false;
+  }
+
+  const normalizedObjects = objects
+    .map(normalizeGameObject)
+    .filter(Boolean);
+
+  if (normalizedObjects.length === 0) {
+    console.warn(
+      "No valid game objects received. Falling back to local development data.",
+    );
+
+    useLocalGameObjects();
+    return false;
+  }
+
+  gameObjects = normalizedObjects;
+  currentObjectIndex = 0;
+
+  return true;
+}
+
+function getHistoricalPeriod(year) {
+  if (year < -3000) {
+    return "Prehistory";
+  }
+
+  if (year <= 476) {
+    return "Antiquity";
+  }
+
+  if (year <= 1492) {
+    return "Middle Ages";
+  }
+
+  if (year <= 1789) {
+    return "Modern Era";
+  }
+
+  return "Contemporary Era";
+}
+
+function validateGameObject(object) {
+  if (!object) {
+    console.error("No game object received.");
+    return false;
+  }
+
+  if (!object.id) {
+    console.error("Game object is missing an id.", object);
+    return false;
+  }
+
+  if (!Number.isInteger(object.year)) {
+    console.error(
+      `Object "${object.id}": missing or invalid reference year.`,
+      object,
+    );
+    return false;
+  }
+
+  return true;
+}
+
+function getObjectDisplayData(object) {
+  return {
+    name: object.name || "Unknown object",
+    image: object.image || null,
+    sourceUrl: object.sourceUrl || null,
+    rarity: object.rarity || null,
+    themes: Array.isArray(object.themes) ? object.themes : [],
+  };
 }
 
 function getCentury(year) {
@@ -388,13 +485,47 @@ function getDirectionHint(userAnswer, answer) {
 function displayObject() {
   const currentObject = getCurrentObject();
 
-  objectImage.src = currentObject.image;
-  objectImage.alt = currentObject.name;
+  if (!validateGameObject(currentObject)) {
+    objectImage.removeAttribute("src");
+    objectImage.alt = "";
+    objectImage.hidden = true;
 
-  objectName.innerText = currentObject.name;
+    objectImageFallback.hidden = true;
+
+    objectName.innerText = "Unable to load object";
+    objectQuestion.innerText = "";
+
+    feedback.innerText = "This object cannot be played.";
+
+    return false;
+  }
+
+  const displayData = getObjectDisplayData(currentObject);
+
+  objectName.innerText = displayData.name;
 
   objectQuestion.innerHTML =
-    `When was the <strong>${currentObject.name}</strong> created?`;
+    `When was the <strong>${displayData.name}</strong> created?`;
+
+  if (displayData.image) {
+    objectImage.src = displayData.image;
+    objectImage.alt = displayData.name;
+    objectImage.hidden = false;
+
+    objectImageFallback.hidden = true;
+  } else {
+    objectImage.removeAttribute("src");
+    objectImage.alt = "";
+    objectImage.hidden = true;
+
+    objectImageFallback.hidden = false;
+
+    console.warn(
+      `Object "${currentObject.id}": missing image. Image unavailable message displayed.`,
+    );
+  }
+
+  return true;
 }
 
 function resetRound() {
@@ -425,7 +556,13 @@ function resetRound() {
 
   nextObjectButton.hidden = true;
 
-  displayObject();
+  const objectLoaded = displayObject();
+
+  if (!objectLoaded) {
+    userAnswerInput.disabled = true;
+    submitButton.disabled = true;
+    nextObjectButton.hidden = false;
+  }
 }
 
 function displayHints(answer) {
@@ -477,12 +614,22 @@ function displayTemperatureFeedback(
 function winRound(currentObject) {
   roundFinished = true;
 
-  feedback.innerHTML =
-    `🥳 You got it! ` +
-    `<a href="${currentObject.link}" ` +
-    `target="_blank" ` +
-    `rel="noopener noreferrer">` +
-    `Learn more about this object</a>`;
+  const displayData = getObjectDisplayData(currentObject);
+
+  if (displayData.sourceUrl) {
+    feedback.innerHTML =
+      `🥳 You got it! ` +
+      `<a href="${displayData.sourceUrl}" ` +
+      `target="_blank" ` +
+      `rel="noopener noreferrer">` +
+      `Learn more about this object</a>`;
+  } else {
+    feedback.innerText = "🥳 You got it!";
+
+    console.warn(
+      `Object "${currentObject.id}": missing documentary source.`,
+    );
+  }
 
   userAnswerInput.disabled = true;
 
@@ -542,9 +689,11 @@ form.addEventListener("submit", (event) => {
 
 nextObjectButton.addEventListener("click", () => {
   currentObjectIndex =
-    (currentObjectIndex + 1) % objects.length;
+    (currentObjectIndex + 1) % gameObjects.length;
 
   resetRound();
 });
+
+setGameObjects(LOCAL_GAME_OBJECTS);
 
 resetRound();
