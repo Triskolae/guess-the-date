@@ -15,23 +15,7 @@
   </head>
 
   <body>
-    <header class="site-header">
-      <a href="index.html" class="site-logo">Guess the Date</a>
-
-      <nav class="main-nav" aria-label="Main navigation">
-        <ul>
-          <li>
-            <a href="game.html" aria-current="page">Play</a>
-          </li>
-          <li>
-            <a href="about.html">About</a>
-          </li>
-          <li>
-            <a href="login.html">Log in</a>
-          </li>
-        </ul>
-      </nav>
-    </header>
+    <app-header></app-header>
 
     <main class="game-page">
       <header class="game-header">
@@ -65,22 +49,12 @@
               required
             />
 
-            <button type="submit" class="button button-primary">
-              Submit
-            </button>
+            <button type="submit" class="button button-primary">Submit</button>
           </div>
 
-          <div
-            id="feedback"
-            class="game-feedback"
-            aria-live="polite"
-          ></div>
+          <div id="feedback" class="game-feedback" aria-live="polite"></div>
 
-          <div
-            id="hints"
-            class="game-hints"
-            aria-live="polite"
-          ></div>
+          <div id="hints" class="game-hints" aria-live="polite"></div>
 
           <button
             type="button"
@@ -141,6 +115,10 @@
       <p>Guess the Date</p>
     </footer>
 
+    <auth-modal></auth-modal>
+
+    <script src="assets/components.js"></script>
+    <script src="assets/auth.js"></script>
     <script src="assets/config.js"></script>
     <script src="assets/game-objects.js"></script>
     <script src="assets/main.js"></script>

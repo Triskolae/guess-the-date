@@ -15,23 +15,7 @@
   </head>
 
   <body>
-    <header class="site-header">
-      <a href="index.html" class="site-logo">Guess the Date</a>
-
-      <nav class="main-nav" aria-label="Main navigation">
-        <ul>
-          <li>
-            <a href="game.html">Play</a>
-          </li>
-          <li>
-            <a href="about.html">About</a>
-          </li>
-          <li>
-            <a href="login.html">Log in</a>
-          </li>
-        </ul>
-      </nav>
-    </header>
+    <app-header></app-header>
 
     <main>
       <section class="hero">
@@ -45,7 +29,7 @@
             clues to get closer to the correct date.
           </p>
 
-          <a href="game.html" class="button button-primary">
+          <a href="game.html" class="play-game button button-primary">
             Play now
           </a>
         </div>
@@ -92,7 +76,7 @@
           in history.
         </p>
 
-        <a href="game.html" class="button button-primary">
+        <a href="game.html" class="play-game button button-primary">
           Start a game
         </a>
       </section>
@@ -107,6 +91,10 @@
       <p>Guess the Date</p>
     </footer>
 
+    <auth-modal></auth-modal>
+
+    <script src="assets/components.js"></script>
+    <script src="assets/auth.js"></script>
     <script src="assets/config.js"></script>
   </body>
 </html>
