@@ -34,15 +34,14 @@
 
 -   **Format :** Application Web avec un Front-End léger en HTML5, CSS3
     et JavaScript ES6 Vanilla.
--   **Back-End :** Serveur Node.js avec Express.
--   **Architecture :** Séparation entre les ressources statiques du
-    Front-End et la logique serveur.
+-   **Back-End :** Serveur Node.js avec Express, Knex.js, et Socket.IO pour le temps réel.
+-   **Authentification :** Sécurisée via JWT stocké dans un Cookie `HttpOnly` (`SameSite=None/Lax`) et vérification e-mail par code OTP.-
+-   **Architecture :** Monorepo séparant les ressources statiques du Front-End et la logique serveur.
 -   **Compatibilité :** Responsive Design (Desktop, Tablette,
     Smartphone) et support des navigateurs modernes.
--   **Communication Front-End / Back-End :** API HTTP/REST au format
-    JSON.
--   **Stockage des données :** API externes + base de données locale ou
-    distante selon les besoins du projet.
+-   **Communication Front-End / Back-End :** API HTTP/REST (JSON) avec gestion CORS et `credentials: 'include'`.
+-   **Stockage des données :** Base PostgreSQL distante (Supabase) avec isolation multi-schémas (`preprod` / `public`).
+-   **Service E-mail :** E-mails transactionnels via API Resend.
 -   **Sources de données envisagées :**
     -   Cooper Hewitt API
     -   Wikidata
@@ -140,8 +139,7 @@ bonne réponse.
 ## 4. Architecture Technique
 
 Le projet est structuré en **Monorepo** :
-
-``` text
+```text
 guess-the-date/
 ├── frontend/
 │   └── public/
@@ -153,25 +151,28 @@ guess-the-date/
 │       ├── login.html
 │       ├── settings.html
 │       └── assets/
-│           ├── config.js         ← Fichier d'URL d'API dynamique
+│           ├── config.js         ← Résolution dynamique de window.API_URL
 │           ├── main.js
 │           ├── style.css
 │           └── img/
-│               ├── gramophone.png
-│               └── uranium.jpg
 │
 ├── backend/
 │   ├── src/
-│   │   ├── routes/
-│   │   ├── controllers/
-│   │   ├── services/
-│   │   └── data/
-│   ├── server.js
-│   ├── Dockerfile                ← Configuration de build Docker (Northflank)
+│   │   ├── controllers/         ← auth.controller.js, etc.
+│   │   ├── database/
+│   │   │   ├── db.js             ← Instance Knex connectée
+│   │   │   └── migrations/     ← Fichiers d'évolution du schéma SQL
+│   │   ├── middlewares/        ← auth.middleware.js (JWT Cookie)
+│   │   ├── routes/             ← auth.routes.js, etc.
+│   │   ├── services/           ← email.service.js (Resend)
+│   │   └── utils/              ← otp.util.js (Code à 6 chiffres)
+│   ├── knexfile.js               ← Conf multi-environnement & multi-schémas
+│   ├── server.js                 ← Express App, CORS, Cookies & Sockets
+│   ├── Dockerfile                ← Build Docker (Northflank)
 │   ├── package.json
 │   └── package-lock.json
 │
-├── package.json                  ← Orchestration dev locale
+├── package.json                  ← Orchestration dev locale (Concurrently + BrowserSync)
 ├── package-lock.json
 ├── .gitignore
 └── README.md
@@ -209,21 +210,22 @@ côté Back-End.
 Le `package.json` situé à la racine est utilisé principalement pour
 orchestrer le développement local et lancer simultanément le Front-End
 et le Back-End.
+### Architecture de Production
 
-\#### Déploiement
-
-Le monorepo pourra être déployé sur plusieurs services :
-
-                            GitHub
-                               │
-                 ┌─────────────┴─────────────┐
-                 │                           │
-         frontend/public/                backend/
-                 │                           │
-          Cloudflare Pages               Northflank (Docker)
-       (Static CDN Host)             (Node.js + WebSockets)
-                 │                           │
-                 └────────── HTTP / WS ──────┴────── Database (Supabase PostgreSQL)
+```text
+                         GitHub
+                           │
+             ┌─────────────┴─────────────┐
+             │                           │
+     frontend/public/                backend/
+             │                           │
+      Cloudflare Pages               Northflank (Docker)
+   (Static CDN Host)             (Node.js + WebSockets)
+             │                           │
+             └────────── HTTP / WS ──────┴────── Database (Supabase PostgreSQL)
+                                                  ├── Schema: preprod
+                                                  └── Schema: public (prod)
+```
 
 Le Front-End et le Back-End restent donc dans un **seul repository**,
 tout en pouvant être déployés indépendamment.
@@ -713,7 +715,7 @@ projet**.
 -   [ ] Récupération automatique des objets depuis Wikidata et/ou Cooper
     Hewitt.
 -   [ ] Normalisation et validation des données.
--   [ ] Mise en place d'une base de données distante.
+-   [x] Mise en place d'une base de données distante.
 -   [ ] Persistance des scores.
 -   [ ] Gestion de sessions et parties.
 -   [ ] Génération aléatoire des objets.
@@ -723,8 +725,9 @@ projet**.
 -   [ ] Chronomètre et état de partie synchronisés côté serveur.
 -   [ ] Authentification des joueurs.
 -   [ ] Tests automatisés.
--   [ ] Déploiement du Front-End sur Vercel.
--   [ ] Déploiement du Back-End sur Render.
+-   [x] Déploiement du Front-End sur CloudFlare Pages.
+-   [x] Déploiement du Back-End sur Northflank.
+-   [x] Déploiement de la BDD sur Supabase.
 
 ---
 
@@ -795,14 +798,18 @@ Browser ──> Frontend (HTML/CSS/JS) ──(HTTP/JSON)──> Express/Node.js 
 
 ## 22. Procédure de Déploiement
 
-### 8.1 Base de données (Supabase)
+1. **Supabase :** PostgreSQL configuré avec Session Pooler (port 5432 / IPv4) et schémas `preprod` et `public`.
+2. **Northflank :** Service connecté au dépôt Git avec build type `Dockerfile` (`/backend/Dockerfile`).
+3. **Cloudflare Pages :** Connecté au dépôt Git avec Build Output Directory réglé sur `frontend/public`.
+
+### 22.1 Base de données (Supabase)
 
 Base PostgreSQL créée sur Supabase.
 
 Chaîne de connexion injectée via la variable DATABASE_URL sur
-Northflank.
+Northflank. => à modifier pour DB_**
 
-### 8.2 Back-End (Northflank)
+### 22.2 Back-End (Northflank)
 
 Déploiement via le Dockerfile situé dans /backend/Dockerfile.
 
@@ -812,10 +819,57 @@ FRONTEND_URL.
 Règle CORS activée pour accepter les requêtes originaires du domaine
 Cloudflare.
 
-### 8.3 Front-End (Cloudflare Pages)
+Via Northflank (Recommandé) : Exécuter npm run migrate:prod directement depuis le terminal / la console de ton conteneur Northflank.
+
+### 22.3 Front-End (Cloudflare Pages)
 
 Connecté au dépôt GitHub.
 
 Build output directory : frontend/public.
 
 Build command : (Vide).
+
+### 22.4 Variables d'Environnement
+
+Dans `backend/.env` (Dev / Prod) ou `backend/.env_preprod` (Staging) :
+
+```env
+PORT=3001
+NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
+
+# Base de données Supabase (Connexion décomposée recommandée)
+DB_HOST=xxx-host.supabase.com
+DB_PORT=5432
+DB_USER=postgres.xxxx
+DB_PASSWORD=ton_mot_de_passe
+DB_NAME=postgres
+
+# Authentification & Service Mail
+JWT_SECRET=ton_jwt_secret_super_securise
+RESEND_API_KEY=re_xxxxxxxxxxxx
+EMAIL_FROM=Guess The Date <onboarding@resend.dev>
+
+---
+
+## 23. Gestion de la Base de Données & Migrations
+
+L'application utilise **Knex.js** pour piloter les évolutions de schéma sur l'instance **Supabase PostgreSQL**. Les environnements **Preprod** et **Prod** sont isolés dans deux schémas distincts (`preprod` et `public`).
+
+### 23.1 Commandes de Migration (depuis `backend/`)
+
+| Action | Commande |
+| :--- | :--- |
+| **Créer une migration** | `npm run migrate:make <nom_migration>` |
+| **Appliquer en Preprod (`preprod`)** | `npm run migrate:preprod` |
+| **Appliquer en Prod (`public`)** | `npm run migrate:prod` |
+| **Rollback Preprod** | `npm run migrate:rollback:preprod` |
+
+---
+
+## 24. Flux d'Authentification & E-mails
+
+1. **Inscription :** Le joueur soumet son e-mail et mot de passe (`POST /api/auth/register`). Le mot de passe est haché avec `bcrypt`.
+2. **Code OTP :** Un code à 6 chiffres est généré et expédié via **Resend** (`sendVerificationEmail`).
+3. **Validation :** Le joueur saisit son code (`POST /api/auth/verify-email`). Une fois vérifié, un **JWT** est généré et stocké dans un cookie HTTP-Only sécurisé.
+4. **Session :** Chaque requête authentifiée transmet automatiquement le cookie (`credentials: 'include'`). Le serveur valide la session via `GET /api/auth/me`.
