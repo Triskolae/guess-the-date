@@ -23,10 +23,32 @@ async function register(req, res) {
 
     // Vérifier si l'utilisateur existe déjà
     const existingUser = await db('users').where({ email }).first();
+
     if (existingUser) {
-      return res.status(409).json({ error: 'Un compte existe déjà avec cet e-mail.' });
+      // Cas 1 : Utilisateur déjà vérifié -> Erreur
+      if (existingUser.is_verified) {
+        return res.status(409).json({ error: 'Un compte existe déjà avec cet e-mail.' });
+      }
+
+      // Cas 2 : Utilisateur existant MAIS non vérifié -> Régénération et renvoi de code
+      const newCode = generateOTP();
+      const newExpiration = getOTPExpiration(15);
+
+      await db('users').where({ id: existingUser.id }).update({
+        verification_code: newCode,
+        verification_expires_at: newExpiration
+      });
+
+      await sendVerificationEmail(email, newCode);
+
+      return res.status(200).json({
+        requiresVerification: true,
+        email,
+        message: 'Un compte non vérifié existe déjà. Un nouveau code de vérification vous a été envoyé.'
+      });
     }
 
+    // Cas 3 : Nouvel utilisateur
     const password_hash = await bcrypt.hash(password, 10);
     const verification_code = generateOTP();
     const verification_expires_at = getOTPExpiration(15); // Expire dans 15 min
@@ -44,6 +66,8 @@ async function register(req, res) {
     await sendVerificationEmail(email, verification_code);
 
     res.status(201).json({
+      requiresVerification: true,
+      email,
       message: 'Compte créé avec succès. Un code de vérification vous a été envoyé par e-mail.'
     });
   } catch (error) {
@@ -52,7 +76,43 @@ async function register(req, res) {
   }
 }
 
-// 2. Vérification de l'e-mail
+// 2. Renvoi de code de vérification
+async function resendCode(req, res) {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Adresse e-mail requise.' });
+    }
+
+    const user = await db('users').where({ email }).first();
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur introuvable.' });
+    }
+
+    if (user.is_verified) {
+      return res.status(400).json({ error: 'Ce compte est déjà vérifié.' });
+    }
+
+    const newCode = generateOTP();
+    const newExpiration = getOTPExpiration(15);
+
+    await db('users').where({ id: user.id }).update({
+      verification_code: newCode,
+      verification_expires_at: newExpiration
+    });
+
+    await sendVerificationEmail(email, newCode);
+
+    res.json({ message: 'Un nouveau code vous a été envoyé par e-mail.' });
+  } catch (error) {
+    console.error('Erreur renvoi de code:', error);
+    res.status(500).json({ error: 'Erreur lors du renvoi du code.' });
+  }
+}
+
+// 3. Vérification de l'e-mail
 async function verifyEmail(req, res) {
   try {
     const { email, code } = req.body;
@@ -90,14 +150,17 @@ async function verifyEmail(req, res) {
     );
 
     res.cookie('token', token, getCookieOptions());
-    res.json({ message: 'E-mail vérifié avec succès. Vous êtes connecté.', user: { id: user.id, email: user.email, username: user.username } });
+    res.json({
+      message: 'E-mail vérifié avec succès. Vous êtes connecté.',
+      user: { id: user.id, email: user.email, username: user.username }
+    });
   } catch (error) {
     console.error('Erreur vérification e-mail:', error);
     res.status(500).json({ error: 'Erreur lors de la vérification.' });
   }
 }
 
-// 3. Connexion
+// 4. Connexion
 async function login(req, res) {
   try {
     const { email, password } = req.body;
@@ -123,14 +186,17 @@ async function login(req, res) {
     );
 
     res.cookie('token', token, getCookieOptions());
-    res.json({ message: 'Connexion réussie.', user: { id: user.id, email: user.email, username: user.username } });
+    res.json({
+      message: 'Connexion réussie.',
+      user: { id: user.id, email: user.email, username: user.username }
+    });
   } catch (error) {
     console.error('Erreur connexion:', error);
     res.status(500).json({ error: 'Erreur lors de la connexion.' });
   }
 }
 
-// 4. Profil connecté (/me)
+// 5. Profil connecté (/me)
 async function getMe(req, res) {
   try {
     const user = await db('users')
@@ -148,7 +214,7 @@ async function getMe(req, res) {
   }
 }
 
-// 5. Déconnexion
+// 6. Déconnexion
 function logout(req, res) {
   res.clearCookie('token', getCookieOptions());
   res.json({ message: 'Déconnexion réussie.' });
@@ -156,6 +222,7 @@ function logout(req, res) {
 
 module.exports = {
   register,
+  resendCode,
   verifyEmail,
   login,
   getMe,

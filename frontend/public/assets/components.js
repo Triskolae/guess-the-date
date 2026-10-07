@@ -32,6 +32,9 @@ class AuthModal extends HTMLElement {
         <div class="modal-content">
           <span class="close-btn">&times;</span>
           
+          <!-- Zone d'affichage des retours utilisateur -->
+          <div id="auth-feedback" class="auth-feedback-msg hidden"></div>
+
           <!-- Formulaire Login -->
           <div id="login-form-container">
             <h2>Connexion</h2>
@@ -57,11 +60,12 @@ class AuthModal extends HTMLElement {
           <!-- Formulaire Code de Vérification (Caché par défaut) -->
           <div id="verify-form-container" class="hidden">
             <h2>Vérification Email</h2>
-            <p>Un code a été envoyé à votre adresse e-mail.</p>
+            <p>Un code a été envoyé à votre adresse e-mail : <strong id="display-pending-email"></strong></p>
             <form id="verify-form">
               <input type="text" id="verify-code" placeholder="Code à 6 chiffres" maxlength="6" required />
               <button type="submit">Valider le code</button>
             </form>
+            <p>Vous n'avez pas reçu le code ? <button type="button" id="resend-code-btn">Renvoyer le code</button></p>
           </div>
 
         </div>
