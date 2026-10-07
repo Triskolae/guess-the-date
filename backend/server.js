@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const express = require("express");
+const morgan = require('morgan');
 const cors = require("cors");
 const cookieParser = require('cookie-parser');
 
@@ -28,6 +29,9 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
+
+// Middleware de logging pour la console
+app.use(morgan('dev'));
 
 // Montage des routes
 app.use('/api/auth', authRoutes);
