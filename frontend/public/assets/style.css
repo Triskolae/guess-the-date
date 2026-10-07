@@ -605,9 +605,9 @@ p  { color: var(--color-text); }
       90deg,
       rgba(7, 28, 41, 0.94) 0%,
       rgba(7, 28, 41, 0.78) 0%,
-      rgba(7, 28, 41, 0.38) 100%
+      rgba(79, 40, 8, 0.38) 100%
     ),
-    url("../ressources-design/Bureau-fond1.png") center / cover fixed;
+    url("../ressources-design/Login-Cropped_v2.jpg") center / cover fixed;
   color: var(--color-cream-light);
 }
 
@@ -724,33 +724,110 @@ p  { color: var(--color-text); }
 
 .auth-brand {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  max-width: 570px;
+  width: 100%;
+  max-width: 760px;
   text-align: center;
 }
 
 .auth-brand-logo {
   display: block;
-  width: min(100%, 520px);
+  width: 100%;
+  animation: logo-float 5s ease-in-out infinite;
+  filter:
+    drop-shadow(0 5px 7px rgba(0, 0, 0, 0.65))
+    drop-shadow(0 0 8px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 0 20px rgba(7, 28, 41, 0.45));
 }
 
 .auth-brand-logo img {
   display: block;
+  position: relative;
   width: 100%;
   height: auto;
   object-fit: contain;
 }
 
-.auth-brand p {
-  max-width: 500px;
-  margin-top: 28px;
-  color: var(--color-cream-light);
-  font-family: var(--font-text);
-  font-size: clamp(1rem, 1.4vw, 1.15rem);
-  line-height: 1.8;
-  opacity: 0.9;
+@keyframes logo-float {
+  0%,
+  100% {
+    transform: scale(1.2) translateY(0);
+  }
+
+  50% {
+    transform: scale(1.2) translateY(-8px);
+  }
+}
+
+.logo-sparkle {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff4c7;
+  box-shadow:
+    0 0 5px #fff4c7,
+    0 0 12px rgba(211, 163, 92, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  animation: none;
+}
+
+.logo-sparkle::before,
+.logo-sparkle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: #fff4c7;
+  transform: translate(-50%, -50%);
+}
+
+.logo-sparkle::before {
+  width: 18px;
+  height: 1px;
+}
+
+.logo-sparkle::after {
+  width: 1px;
+  height: 18px;
+}
+
+.sparkle-1 {
+  top: 20%;
+  left: 25%;
+}
+
+.sparkle-2 {
+  top: 55%;
+  left: 68%;
+}
+
+.sparkle-3 {
+  top: 32%;
+  left: 88%;
+}
+
+.logo-sparkle.sparkle-active {
+  animation: logo-sparkle 0.7s ease-in-out;
+}
+
+@keyframes logo-sparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(0deg);
+  }
+
+  45% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.3) rotate(90deg);
+  }
 }
 
 .auth-menu-toggle {
