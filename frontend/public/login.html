@@ -162,7 +162,7 @@
         ></div>
       </section>
 
-     <section class="auth-brand">
+      <section class="auth-brand">
         <a
           href="index.html"
           class="auth-brand-logo"
@@ -180,27 +180,9 @@
       </section>
     </main>
 
+    <script src="assets/config.js"></script>
     <script src="assets/components.js"></script>
     <script src="assets/auth.js"></script>
-    <script src="assets/config.js"></script>
-
-    <script>
-      document.querySelectorAll(".logo-sparkle").forEach((sparkle) => {
-        function triggerSparkle() {
-          sparkle.classList.add("sparkle-active");
-
-          setTimeout(() => {
-            sparkle.classList.remove("sparkle-active");
-
-            const delay = 1500 + Math.random() * 4500;
-            setTimeout(triggerSparkle, delay);
-          }, 700);
-        }
-
-        const initialDelay = Math.random() * 3000;
-        setTimeout(triggerSparkle, initialDelay);
-      });
-    </script>
-
+    <script src="assets/login.js"></script>
   </body>
 </html>
