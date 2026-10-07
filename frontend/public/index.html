@@ -11,13 +11,13 @@
 
     <title>Guess the Date</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <link
       href="https://fonts.googleapis.com/css2?family=Beau+Rivage&family=Cormorant+Infant:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Eagle+Lake&family=Fondamento:ital@0;1&family=Great+Vibes&family=Imperial+Script&family=Italianno&family=MonteCarlo&family=Quintessential&family=Updock&display=swap"
       rel="stylesheet"
-    >
+    />
 
     <link rel="stylesheet" href="assets/style.css" />
   </head>
@@ -32,9 +32,15 @@
 
           <h1>Can you guess the date?</h1>
 
-          <p>Test your knowledge. Follow your intuition. Build your sense of chronology.</p>
-          <p>Explore monuments, inventions, works of art and everyday objects from across history. Guess when they appeared and see how good your sense of time really is.</p>
-          
+          <p>
+            Test your knowledge. Follow your intuition. Build your sense of
+            chronology.
+          </p>
+          <p>
+            Explore monuments, inventions, works of art and everyday objects
+            from across history. Guess when they appeared and see how good your
+            sense of time really is.
+          </p>
 
           <a href="game.html" class="play-game button button-primary">
             PLAY NOW
@@ -50,7 +56,8 @@
             <h3>Observe</h3>
 
             <p>
-              Look at the monument, invention, artwork or object and use what you know to place it in time.
+              Look at the monument, invention, artwork or object and use what
+              you know to place it in time.
             </p>
           </article>
 
@@ -58,7 +65,8 @@
             <h3>Pick a date</h3>
 
             <p>
-              Enter the year you think it was created or first appeared. Your guess will show you how close you are.
+              Enter the year you think it was created or first appeared. Your
+              guess will show you how close you are.
             </p>
           </article>
 
@@ -66,7 +74,8 @@
             <h3>Get closer</h3>
 
             <p>
-              Too early? Too late? Hot or cold? Follow the clues and refine your guesses until you find the correct date.
+              Too early? Too late? Hot or cold? Follow the clues and refine your
+              guesses until you find the correct date.
             </p>
           </article>
         </div>
@@ -100,5 +109,17 @@
     <script src="assets/components.js"></script>
     <script src="assets/auth.js"></script>
     <script src="assets/config.js"></script>
+    <script type="module">
+      // Exécuté au chargement de la page d'accueil
+      window.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        if (urlParams.get("openAuth") === "true") {
+          if (typeof window.openAuthModal === "function") {
+            window.openAuthModal();
+          }
+        }
+      });
+    </script>
   </body>
 </html>

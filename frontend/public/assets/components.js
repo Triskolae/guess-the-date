@@ -17,23 +17,44 @@ class AppHeader extends HTMLElement {
         </a>
 
         <nav class="main-nav" aria-label="Main navigation">
-            <ul>
-            <li>
-                <a href="game.html" class="play-game">Play</a>
-            </li>
-            <li>
-                <a href="about.html">About</a>
-            </li>
-            <li>
-                <a href="login.html">Log in</a>
-            </li>
-            </ul>
+          <ul>
+          <li>
+            <a href="game.html" class="play-game">Play</a>
+          </li>
+          <li>
+            <a href="about.html">About</a>
+          </li>
+          <li>
+            <a href="login.html">Log in</a>
+          </li>
+          </ul>
         </nav>
       </header>
     `;
   }
 }
 customElements.define("app-header", AppHeader);
+
+// Écoute de l'événement global pour ouvrir la modale d'authentification
+window.addEventListener("open-auth-modal", () => {
+  const authModal = document.getElementById("auth-modal");
+  if (authModal) {
+    authModal.classList.remove("hidden");
+  }
+});
+
+// Écouteur pour fermer la modale
+document.addEventListener("click", (event) => {
+  if (
+    event.target.matches(".close-auth-modal") ||
+    event.target.id === "auth-modal"
+  ) {
+    const authModal = document.getElementById("auth-modal");
+    if (authModal) {
+      authModal.classList.add("hidden");
+    }
+  }
+});
 
 // Composant Popup Auth
 class AuthModal extends HTMLElement {

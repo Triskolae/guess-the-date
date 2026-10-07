@@ -1,103 +1,150 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // --- 1. SÉLECTEURS ÉLÉMENTS DU DOM ---
-  const modal = document.getElementById('auth-modal');
-  const openBtn = document.getElementById('open-auth-btn');
-  const closeBtn = document.querySelector('.close-btn');
+// --- 1. FONCTIONS GLOBALES D'AUTHENTIFICATION ---
+
+// Déclenche l'événement personnalisé pour ouvrir la modale d'authentification
+window.openAuthModal = function () {
+  window.dispatchEvent(new CustomEvent("open-auth-modal"));
+};
+
+// Vérifie si l'utilisateur est authentifié via le cookie HTTP-Only
+window.checkAuthStatus = async function () {
+  try {
+    const response = await fetch(`${window.API_URL}/api/auth/me`, {
+      method: "GET",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.user;
+    }
+  } catch (err) {
+    console.error("Erreur de vérification de session :", err);
+  }
+  return null;
+};
+
+// Enrobe une action nécessitant d'être connecté
+window.handleProtectedAction = async function (actionCallback) {
+  const user = await window.checkAuthStatus();
+  if (!user) {
+    window.openAuthModal();
+    return;
+  }
+  actionCallback(user);
+};
+
+// Écouteur global pour l'ouverture de la modale d'authentification
+window.addEventListener("open-auth-modal", () => {
+  const modal = document.getElementById("auth-modal");
+  if (modal) {
+    modal.classList.remove("hidden");
+  }
+});
+
+// --- 2. GESTION DU DOM ET DES FORMULAIRES ---
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Sélecteurs d'éléments du DOM
+  const modal = document.getElementById("auth-modal");
+  const openBtn = document.getElementById("open-auth-btn");
+  const closeBtn = document.querySelector(".close-btn");
 
   // Conteneurs des 3 formulaires
-  const loginContainer = document.getElementById('login-form-container');
-  const registerContainer = document.getElementById('register-form-container');
-  const verifyContainer = document.getElementById('verify-form-container');
+  const loginContainer = document.getElementById("login-form-container");
+  const registerContainer = document.getElementById("register-form-container");
+  const verifyContainer = document.getElementById("verify-form-container");
 
   // Boutons de bascule (switch) et renvoi de code
-  const switchToRegister = document.getElementById('switch-to-register');
-  const switchToLogin = document.getElementById('switch-to-login');
-  const resendCodeBtn = document.getElementById('resend-code-btn');
+  const switchToRegister = document.getElementById("switch-to-register");
+  const switchToLogin = document.getElementById("switch-to-login");
+  const resendCodeBtn = document.getElementById("resend-code-btn");
 
-  // Zone de message d'information / d'erreur
-  const feedbackBox = document.getElementById('auth-feedback');
-  const displayEmailSpan = document.getElementById('display-pending-email');
+  // Zone de messages
+  const feedbackBox = document.getElementById("auth-feedback");
+  const displayEmailSpan = document.getElementById("display-pending-email");
 
   // Formulaires
-  const loginForm = document.getElementById('login-form');
-  const registerForm = document.getElementById('register-form');
-  const verifyForm = document.getElementById('verify-form');
+  const loginForm = document.getElementById("login-form");
+  const registerForm = document.getElementById("register-form");
+  const verifyForm = document.getElementById("verify-form");
 
-  // Variable locale pour retenir l'email pendant le processus de vérification
-  let pendingEmail = '';
+  let pendingEmail = "";
 
-  // Fonction utilitaire pour afficher des messages dans la modale
+  // Helpers de feedback
   function showFeedback(message, isError = false) {
     if (!feedbackBox) return;
     feedbackBox.textContent = message;
-    feedbackBox.className = `auth-feedback-msg ${isError ? 'error-msg' : 'success-msg'}`;
+    feedbackBox.className = `auth-feedback-msg ${isError ? "error-msg" : "success-msg"}`;
   }
 
   function clearFeedback() {
     if (!feedbackBox) return;
-    feedbackBox.textContent = '';
-    feedbackBox.className = 'auth-feedback-msg hidden';
+    feedbackBox.textContent = "";
+    feedbackBox.className = "auth-feedback-msg hidden";
   }
 
-  // Fonction pour afficher la section de vérification
   function openVerificationStep(email, message) {
     pendingEmail = email;
     if (displayEmailSpan) displayEmailSpan.textContent = email;
 
-    loginContainer.classList.add('hidden');
-    registerContainer.classList.add('hidden');
-    verifyContainer.classList.remove('hidden');
+    loginContainer?.classList.add("hidden");
+    registerContainer?.classList.add("hidden");
+    verifyContainer?.classList.remove("hidden");
 
-    if (modal) modal.classList.remove('hidden');
-    showFeedback(message || "Un code de vérification vous a été envoyé.", false);
+    window.openAuthModal();
+    showFeedback(
+      message || "Un code de vérification vous a été envoyé.",
+      false,
+    );
   }
 
-  // --- 2. GESTION DE L'OUVERTURE / FERMETURE DE LA MODALE ---
+  // Ouverture / Fermeture de la modale
   if (openBtn) {
-    openBtn.addEventListener('click', () => {
+    openBtn.addEventListener("click", () => {
       clearFeedback();
-      if (modal) modal.classList.remove('hidden');
+      window.openAuthModal();
     });
   }
 
   if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
+    closeBtn.addEventListener("click", () => {
       clearFeedback();
-      if (modal) modal.classList.add('hidden');
+      if (modal) modal.classList.add("hidden");
     });
   }
 
-  window.addEventListener('click', (event) => {
+  window.addEventListener("click", (event) => {
     if (event.target === modal) {
       clearFeedback();
-      modal.classList.add('hidden');
+      modal.classList.add("hidden");
     }
   });
 
-  // --- 3. BASCULEMENT ENTRE LES FORMULAIRES ---
+  // Bascule entre formulaires
   if (switchToRegister) {
-    switchToRegister.addEventListener('click', (e) => {
+    switchToRegister.addEventListener("click", (e) => {
       e.preventDefault();
       clearFeedback();
-      loginContainer.classList.add('hidden');
-      registerContainer.classList.remove('hidden');
-      verifyContainer.classList.add('hidden');
+      loginContainer?.classList.add("hidden");
+      registerContainer?.classList.remove("hidden");
+      verifyContainer?.classList.add("hidden");
     });
   }
 
   if (switchToLogin) {
-    switchToLogin.addEventListener('click', (e) => {
+    switchToLogin.addEventListener("click", (e) => {
       e.preventDefault();
       clearFeedback();
-      registerContainer.classList.add('hidden');
-      loginContainer.classList.remove('hidden');
-      verifyContainer.classList.add('hidden');
+      registerContainer?.classList.add("hidden");
+      loginContainer?.classList.remove("hidden");
+      verifyContainer?.classList.add("hidden");
     });
   }
 
-  // --- 4. GESTION DE LA SOUMISSION DU FORMULAIRE DE CONNEXION ---
+  // Submission : Connexion
   if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
+    loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearFeedback();
 
@@ -106,20 +153,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         const response = await fetch(`${window.API_URL}/api/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ email, password })
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email, password }),
         });
 
         const data = await response.json();
 
         if (response.ok) {
-          modal.classList.add('hidden');
-          window.location.href = 'game.html';
+          modal?.classList.add("hidden");
+          window.location.href = "game.html";
         } else if (response.status === 403) {
-          // Si le compte n'est pas vérifié
-          openVerificationStep(email, data.error || "Veuillez valider votre e-mail avant de vous connecter.");
+          openVerificationStep(
+            email,
+            data.error ||
+              "Veuillez valider votre e-mail avant de vous connecter.",
+          );
         } else {
           showFeedback(data.error || "Identifiants incorrects.", true);
         }
@@ -130,21 +180,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 5. GESTION DE LA SOUMISSION DE L'INSCRIPTION ---
+  // Submission : Inscription
   if (registerForm) {
-    registerForm.addEventListener('submit', async (e) => {
+    registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearFeedback();
 
-      const email = document.getElementById('reg-email').value;
-      const password = document.getElementById('reg-password').value;
+      const email = document.getElementById("reg-email").value;
+      const password = document.getElementById("reg-password").value;
 
       try {
         const response = await fetch(`${window.API_URL}/api/auth/register`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ email, password })
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email, password }),
         });
 
         const data = await response.json();
@@ -161,27 +211,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 6. GESTION DU CODE DE VÉRIFICATION ---
+  // Submission : Code de vérification
   if (verifyForm) {
-    verifyForm.addEventListener('submit', async (e) => {
+    verifyForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       clearFeedback();
 
-      const code = document.getElementById('verify-code').value;
+      const code = document.getElementById("verify-code").value;
 
       try {
-        const response = await fetch(`${window.API_URL}/api/auth/verify-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ email: pendingEmail, code })
-        });
+        const response = await fetch(
+          `${window.API_URL}/api/auth/verify-email`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ email: pendingEmail, code }),
+          },
+        );
 
         const data = await response.json();
 
         if (response.ok) {
-          modal.classList.add('hidden');
-          window.location.href = 'game.html';
+          modal?.classList.add("hidden");
+          window.location.href = "game.html";
         } else {
           showFeedback(data.error || "Code invalide ou expiré.", true);
         }
@@ -192,23 +245,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 7. RENVOYER LE CODE DE VÉRIFICATION ---
+  // Renvoi du code
   if (resendCodeBtn) {
-    resendCodeBtn.addEventListener('click', async (e) => {
+    resendCodeBtn.addEventListener("click", async (e) => {
       e.preventDefault();
       clearFeedback();
 
       if (!pendingEmail) {
-        showFeedback("Adresse email introuvable. Veuillez retenter votre inscription.", true);
+        showFeedback(
+          "Adresse email introuvable. Veuillez retenter votre inscription.",
+          true,
+        );
         return;
       }
 
       try {
         const response = await fetch(`${window.API_URL}/api/auth/resend-code`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ email: pendingEmail })
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email: pendingEmail }),
         });
 
         const data = await response.json();
@@ -216,7 +272,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (response.ok) {
           showFeedback(data.message || "Nouveau code envoyé !", false);
         } else {
-          showFeedback(data.error || "Impossible d'envoyer un nouveau code.", true);
+          showFeedback(
+            data.error || "Impossible d'envoyer un nouveau code.",
+            true,
+          );
         }
       } catch (err) {
         console.error("Erreur lors du renvoi de code :", err);
@@ -226,63 +285,33 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Fonction pour vérifier si l'utilisateur est authentifié via le cookie
-async function checkAuth() {
-  try {
-    const response = await fetch(`${window.API_URL}/api/auth/me`, {
-      method: 'GET',
-      credentials: 'include' // OBLIGATOIRE : transmet le cookie HttpOnly au serveur
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      return data.user; // L'utilisateur est connecté
-    }
-  } catch (err) {
-    console.error("Erreur de vérification de session :", err);
-  }
-  return null; // Non connecté
-}
-
-// Interception des clics sur "Play"
-document.addEventListener('click', async (event) => {
-  const btn = event.target.closest('.play-game');
+// --- 3. DÉLÉGATION D'ÉVÉNEMENTS GLOBAUX ---
+// Interception des clics sur les boutons "Play"
+document.addEventListener("click", async (event) => {
+  const btn = event.target.closest(".play-game");
   if (btn) {
-    event.preventDefault();
-
-    const user = await checkAuth();
-
-    if (user) {
-      window.location.href = 'game.html';
-    } else {
-      const modal = document.querySelector('#auth-modal');
-      if (modal) modal.classList.remove('hidden');
-    }
+    window.location.href = "game.html";
   }
 });
 
-// --- GESTION DE LA DÉCONNEXION ---
-document.addEventListener('click', async (event) => {
-  const logoutBtn = event.target.closest('.logout-button');
-  
+// Clics sur les boutons de déconnexion
+document.addEventListener("click", async (event) => {
+  const logoutBtn = event.target.closest(".logout-button");
   if (logoutBtn) {
     event.preventDefault();
 
     try {
       const response = await fetch(`${window.API_URL}/api/auth/logout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include' // Indispensable pour supprimer le cookie HTTP-Only côté serveur
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
       });
 
       if (response.ok) {
-        // Redirection vers l'accueil ou rechargement de la page après déconnexion
-        window.location.href = 'index.html'; 
-      } else {
-        console.error('Erreur lors de la déconnexion');
+        window.location.href = "index.html";
       }
     } catch (err) {
-      console.error('Erreur réseau lors de la déconnexion :', err);
+      console.error("Erreur réseau lors de la déconnexion :", err);
     }
   }
 });
