@@ -3,7 +3,18 @@ class AppHeader extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <header class="site-header">
-        <a href="index.html" class="site-logo">Guess the Date</a>
+        <a href="index.html" class="site-logo" aria-label="Guess the Date — Home">
+          <picture>
+            <source
+              media="(max-width: 600px)"
+              srcset="ressources-design/LOOP_GuessTheDate_DoreeBlue.png"
+            />
+            <img
+              src="ressources-design/LOGO_GuessTheDate_DoreeBleu.png"
+              alt="Guess the Date"
+            />
+          </picture>
+        </a>
 
         <nav class="main-nav" aria-label="Main navigation">
             <ul>

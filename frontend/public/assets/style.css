@@ -1,40 +1,27 @@
-img {
-  width: 200px;
-}
-
 .main {
   display: flex;
   flex-direction: row;
   gap: 5rem;
 }
- /* ==========================================================================
-   GUESS THE DATE — Fondations CSS (01 — Variables / reset / styles globaux)
-   Respecte la nomenclature donnée dans la transmission frontend.
-   ========================================================================== */
 
 :root {
-  /* Bleus — navigation, structure, boutons importants, éléments interactifs */
+
   --color-blue-dark:  #113345;
   --color-blue:       #1F475B;
   --color-blue-light: #B5BFC3;
 
-  /* Bruns — bois, cuir, livres, objets anciens */
   --color-brown-dark:  #321A0C;
   --color-brown:       #4A2B17;
   --color-brown-light: #704E36;
 
-  /* Dorés — accents, séparateurs, détails d'identité */
   --color-gold-dark:  #73451E;
   --color-gold:       #BE8A53;
   --color-gold-light: #E5BB84;
 
-  /* Crèmes — cartes, formulaires, surfaces de lecture, fond du logo */
   --color-cream-dark:  #EED4AD;
   --color-cream:       #F2DFC2;
   --color-cream-light: #F0E8DB;
 
-  /* Rôles sémantiques, construits à partir de la palette ci-dessus :
-     évite de relire des hex partout dans les fichiers de page. */
   --color-text:            var(--color-brown-dark);
   --color-text-muted:      var(--color-brown-light);
   --color-text-on-dark:    var(--color-cream-light);
@@ -48,19 +35,21 @@ img {
   --color-border:          rgba(74, 43, 23, 0.18);
   --color-focus-ring:      var(--color-blue);
 
-  /* Feedback chaud/froid (6 paliers, voir main.js) */
   --feedback-correct:    var(--color-gold-light);
-  --feedback-25:         #B5433B; /* proche : alerte chaleureuse */
+  --feedback-25:         #B5433B;
   --feedback-50:         var(--color-gold-dark);
   --feedback-75:         var(--color-brown-light);
   --feedback-100:        var(--color-blue);
   --feedback-far:        var(--color-blue-dark);
+  
 
-  /* Typo */
-  --font-heading: Georgia, "Iowan Old Style", "Times New Roman", serif;
-  --font-body: "Century Gothic", CenturyGothic, "Apple Gothic", "Questrial", system-ui, sans-serif;
+  --font-title: "Imperial Script", cursive, system-ui; 
+  --font-subtitle: "Fondamento", serif, system-ui;
+  --font-text: "Fondamento", serif, system-ui;
+  --font-action: "Fondamento", serif, system-ui ;
+  /* test manuscrit : Imperial Script , MonteCarlo , Italianno , Updock */
+  /* test non manuscrit : Fondamento , Cormorant Infant , Quintessential */
 
-  /* Échelle d'espacement (8px) */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -78,21 +67,22 @@ img {
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* --------------------------------------------------------------------------
-   Reset minimal
-   -------------------------------------------------------------------------- */
+/* Reset minimal */
+
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: var(--font-body);
+  font-family: var(--font-text);
   color: var(--color-text);
   background: var(--color-surface-alt);
   line-height: 1.5;
 }
+
 img, svg { display: block; max-width: 100%; }
 button, input, select, textarea { font: inherit; color: inherit; }
+button, .button, .main-nav a, input, select, textarea { font-family: var(--font-action); }
 button { cursor: pointer; }
 a { color: inherit; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
@@ -102,11 +92,8 @@ h1, h2, h3, h4, p { margin: 0; }
 html, body { overflow-x: hidden; width: 100%; }
 img { object-fit: cover; }
 
-/* --------------------------------------------------------------------------
-   Typographie
-   -------------------------------------------------------------------------- */
 h1, h2, h3, .heading {
-  font-family: var(--font-heading);
+  font-family: var(--font-title);
   font-weight: 400;
   color: var(--color-text);
   letter-spacing: 0.01em;
@@ -122,10 +109,14 @@ p  { color: var(--color-text); }
   text-transform: uppercase;
   color: var(--color-accent-strong);
 }
+.eyebrow,
+.hero-kicker,
+.game-kicker,
+.page-kicker {
+  font-family: var(--font-action);
+}
 
-/* --------------------------------------------------------------------------
-   Focus visible — accessibilité (exigence V0)
-   -------------------------------------------------------------------------- */
+/* Focus visible : accessibilité */
 :focus { outline: none; }
 :focus-visible {
   outline: 3px solid var(--color-focus-ring);
@@ -133,9 +124,8 @@ p  { color: var(--color-text); }
   border-radius: var(--radius-sm);
 }
 
-/* ==========================================================================
-   03 — Header / Navigation
-   ========================================================================== */
+/* Header / Navigation */
+
 .site-header {
   display: flex;
   align-items: center;
@@ -146,7 +136,6 @@ p  { color: var(--color-text); }
   background: var(--color-structure);
 }
 
-/* Le logo garde une zone claire derrière lui, même sur fond sombre (exigence DA) */
 .site-logo {
   display: inline-flex;
   align-items: center;
@@ -188,9 +177,8 @@ p  { color: var(--color-text); }
   .main-nav ul { gap: var(--space-4); }
 }
 
-/* ==========================================================================
-   06 — Footer
-   ========================================================================== */
+/* Footer */
+
 .site-footer {
   display: flex;
   flex-direction: column;
@@ -217,9 +205,9 @@ p  { color: var(--color-text); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
-/* ==========================================================================
-   07 — Home
-   ========================================================================== */
+
+/* Home */
+
 .hero, .game-introduction, .home-cta {
   max-width: 960px;
   margin-inline: auto;
@@ -246,6 +234,7 @@ p  { color: var(--color-text); }
 
 .game-introduction h2,
 .home-cta h2 {
+  font-family: var(--font-subtitle);
   text-align: center;
   margin-bottom: var(--space-5);
 }
@@ -262,6 +251,7 @@ p  { color: var(--color-text); }
   box-shadow: var(--shadow-card);
 }
 .game-step h3 {
+  font-family: var(--font-subtitle);
   color: var(--color-accent-strong);
   margin-bottom: var(--space-2);
 }
@@ -281,9 +271,10 @@ p  { color: var(--color-text); }
 
 @media (max-width: 760px) {
   .game-steps { grid-template-columns: 1fr; }
-} /* ==========================================================================
-   04 — Boutons
-   ========================================================================== */
+} 
+
+/* Boutons */
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -315,9 +306,10 @@ p  { color: var(--color-text); }
   color: var(--color-text-muted);
   cursor: not-allowed;
   transform: none;
-} /* ==========================================================================
-   05 — Formulaires
-   ========================================================================== */
+} 
+
+/* Formulaires */
+
 .answer-field {
   display: flex;
   flex-wrap: wrap;
@@ -351,9 +343,10 @@ p  { color: var(--color-text); }
 
 .answer-field input:focus-visible {
   border-color: var(--color-structure-alt);
-} /* ==========================================================================
-   08 — Game
-   ========================================================================== */
+} 
+
+/*  Game */
+
 .game-page {
   max-width: 1100px;
   margin-inline: auto;
@@ -456,9 +449,10 @@ p  { color: var(--color-text); }
   .game-form    { grid-column: 1; }
   .timeline-section { grid-column: 1 / -1; }
   .game-help    { grid-column: 2; grid-row: 1 / 3; }
-} /* ==========================================================================
-   09 — Frise chronologique
-   ========================================================================== */
+} 
+
+/* Frise chronologique */
+
 .timeline-section {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
@@ -540,9 +534,10 @@ p  { color: var(--color-text); }
    même si .button lui donne un display: inline-flex */
 [hidden] {
   display: none !important;
-} /* ==========================================================================
-   Formulaires communs (login, signup, settings)
-   ========================================================================== */
+} 
+
+/* Formulaires communs (login, signup, settings) */
+
 .form-field {
   display: flex;
   flex-direction: column;
@@ -565,9 +560,8 @@ p  { color: var(--color-text); }
   border-color: var(--color-structure-alt);
 }
 
-/* ==========================================================================
-   10 — Login / Sign up
-   ========================================================================== */
+/*  Login / Sign up */
+
 .auth-page {
   max-width: 900px;
   margin-inline: auto;
@@ -606,9 +600,9 @@ p  { color: var(--color-text); }
 
 @media (min-width: 760px) {
   .auth-container { grid-template-columns: 1fr 1fr; }
-}  /* =========================================================
-   ACCOUNT
-   ========================================================= */
+}  
+
+/* ACCOUNT */
 
 .account-page {
   width: min(1180px, calc(100% - 48px));
@@ -636,7 +630,6 @@ p  { color: var(--color-text); }
   color: var(--color-brown, #4A2B17);
   font-size: 1.15rem;
 }
-
 
 /* Navigation Account */
 
@@ -683,7 +676,6 @@ p  { color: var(--color-text); }
   color: #fff;
 }
 
-
 /* Sections */
 
 .account-profile,
@@ -707,7 +699,6 @@ p  { color: var(--color-text); }
   font-size: 1.8rem;
   font-weight: 400;
 }
-
 
 /* Profile */
 
@@ -738,7 +729,6 @@ p  { color: var(--color-text); }
   color: var(--color-brown-dark, #321A0C);
   font-size: 1.05rem;
 }
-
 
 /* Statistics */
 
@@ -780,7 +770,6 @@ p  { color: var(--color-text); }
   line-height: 1;
 }
 
-
 /* Keep exploring */
 
 .account-actions {
@@ -805,10 +794,7 @@ p  { color: var(--color-text); }
   outline-offset: 3px;
 }
 
-
-/* =========================================================
-   ACCOUNT — RESPONSIVE
-   ========================================================= */
+/* ACCOUNT — RESPONSIVE */
 
 @media (max-width: 850px) {
 
@@ -877,9 +863,9 @@ p  { color: var(--color-text); }
     grid-template-columns: 1fr;
   }
 
-} /* =========================================================
-   BADGES
-   ========================================================= */
+} 
+
+/* BADGES */
 
 .badges-section {
   margin-bottom: 30px;
@@ -907,10 +893,7 @@ p  { color: var(--color-text); }
   line-height: 1.6;
 }
 
-
-/* ---------------------------------------------------------
-   GRILLE
-   --------------------------------------------------------- */
+/* GRILLE */
 
 .badges-grid {
   display: grid;
@@ -918,10 +901,7 @@ p  { color: var(--color-text); }
   gap: 18px;
 }
 
-
-/* ---------------------------------------------------------
-   CARTE BADGE
-   --------------------------------------------------------- */
+/* CARTE BADGE */
 
 .badge-card {
   position: relative;
@@ -963,7 +943,6 @@ p  { color: var(--color-text); }
   font-weight: 400;
 }
 
-
 /* Description */
 
 .badge-card > p:not(.badge-level):not(.badge-progress) {
@@ -974,10 +953,7 @@ p  { color: var(--color-text); }
   line-height: 1.55;
 }
 
-
-/* ---------------------------------------------------------
-   NIVEAU
-   --------------------------------------------------------- */
+/* NIVEAU */
 
 .badge-level {
   margin: auto 0 6px;
@@ -989,7 +965,6 @@ p  { color: var(--color-text); }
   letter-spacing: 0.08em;
 }
 
-
 /* Progression */
 
 .badge-progress {
@@ -999,10 +974,7 @@ p  { color: var(--color-text); }
   font-size: 0.9rem;
 }
 
-
-/* ---------------------------------------------------------
-   STATUT
-   --------------------------------------------------------- */
+/* STATUT */
 
 .badge-status {
   align-self: flex-start;
@@ -1017,14 +989,12 @@ p  { color: var(--color-text); }
   letter-spacing: 0.04em;
 }
 
-
 /* Locked */
 
 .badge-card:not(.badge-unlocked) .badge-status {
   background: rgba(74, 43, 23, 0.09);
   color: var(--color-brown, #4A2B17);
 }
-
 
 /* Unlocked */
 
@@ -1038,10 +1008,7 @@ p  { color: var(--color-text); }
   color: #fff;
 }
 
-
-/* ---------------------------------------------------------
-   SPECIAL ACHIEVEMENTS
-   --------------------------------------------------------- */
+/* SPECIAL ACHIEVEMENTS */
 
 .badges-section + .badges-section {
   margin-top: 30px;
@@ -1051,10 +1018,7 @@ p  { color: var(--color-text); }
   grid-template-columns: repeat(2, 1fr);
 }
 
-
-/* ---------------------------------------------------------
-   LEVELS
-   --------------------------------------------------------- */
+/* LEVELS */
 
 .badge-levels {
   margin-bottom: 30px;
@@ -1095,20 +1059,14 @@ p  { color: var(--color-text); }
   color: var(--color-gold-dark, #73451E);
 }
 
-
-/* ---------------------------------------------------------
-   FOCUS ACCESSIBILITÉ
-   --------------------------------------------------------- */
+/* FOCUS ACCESSIBILITÉ */
 
 .badge-card:focus-within {
   outline: 3px solid var(--color-gold, #BE8A53);
   outline-offset: 3px;
 }
 
-
-/* =========================================================
-   BADGES — RESPONSIVE
-   ========================================================= */
+/* BADGES — RESPONSIVE */
 
 @media (max-width: 900px) {
 
@@ -1121,7 +1079,6 @@ p  { color: var(--color-text); }
   }
 
 }
-
 
 @media (max-width: 650px) {
 
@@ -1145,7 +1102,6 @@ p  { color: var(--color-text); }
 
 }
 
-
 @media (max-width: 420px) {
 
   .badge-card {
@@ -1157,9 +1113,9 @@ p  { color: var(--color-text); }
     font-size: 1.6rem;
   }
 
-} /* =========================================================
-   SETTINGS
-   ========================================================= */
+} 
+
+/* SETTINGS */
 
 .settings-section {
   margin-bottom: 30px;
@@ -1179,10 +1135,7 @@ p  { color: var(--color-text); }
   font-weight: 400;
 }
 
-
-/* ---------------------------------------------------------
-   FORMULAIRE
-   --------------------------------------------------------- */
+/* FORMULAIRE */
 
 .settings-form {
   max-width: 720px;
@@ -1224,7 +1177,6 @@ p  { color: var(--color-text); }
     background-color 0.2s ease;
 }
 
-
 /* Focus */
 
 .form-field input:focus {
@@ -1243,15 +1195,11 @@ p  { color: var(--color-text); }
   color: rgba(74, 43, 23, 0.45);
 }
 
-
-/* ---------------------------------------------------------
-   BOUTONS
-   --------------------------------------------------------- */
+/* BOUTONS */
 
 .settings-form .button {
   margin-top: 4px;
 }
-
 
 /* Account / Log out */
 
@@ -1271,10 +1219,7 @@ p  { color: var(--color-text); }
   border-color: var(--color-gold, #BE8A53);
 }
 
-
-/* ---------------------------------------------------------
-   FOCUS ACCESSIBILITÉ
-   --------------------------------------------------------- */
+/* FOCUS ACCESSIBILITÉ */
 
 .settings-form .button:focus-visible,
 .logout-button:focus-visible,
@@ -1283,10 +1228,7 @@ p  { color: var(--color-text); }
   outline-offset: 3px;
 }
 
-
-/* =========================================================
-   SETTINGS — RESPONSIVE
-   ========================================================= */
+/* SETTINGS — RESPONSIVE */
 
 @media (max-width: 650px) {
 
@@ -1306,9 +1248,9 @@ p  { color: var(--color-text); }
     padding: 14px 15px;
   }
 
-} /* =========================================================
-   ABOUT
-   ========================================================= */
+} 
+
+/* ABOUT */
 
 .about-page {
   width: min(1000px, calc(100% - 48px));
@@ -1316,10 +1258,7 @@ p  { color: var(--color-text); }
   padding: 75px 0 90px;
 }
 
-
-/* ---------------------------------------------------------
-   HEADER
-   --------------------------------------------------------- */
+/* HEADER */
 
 .about-header {
   max-width: 850px;
@@ -1359,10 +1298,7 @@ p  { color: var(--color-text); }
   line-height: 1.7;
 }
 
-
-/* ---------------------------------------------------------
-   SECTIONS
-   --------------------------------------------------------- */
+/* SECTIONS */
 
 .about-section {
   margin-bottom: 24px;
@@ -1398,10 +1334,7 @@ p  { color: var(--color-text); }
   margin-bottom: 0;
 }
 
-
-/* ---------------------------------------------------------
-   CTA
-   --------------------------------------------------------- */
+/* CTA */
 
 .about-cta {
   margin-top: 35px;
@@ -1430,20 +1363,14 @@ p  { color: var(--color-text); }
   align-items: center;
 }
 
-
-/* ---------------------------------------------------------
-   FOCUS ACCESSIBILITÉ
-   --------------------------------------------------------- */
+/* FOCUS ACCESSIBILITÉ */
 
 .about-cta .button:focus-visible {
   outline: 3px solid var(--color-gold-light, #E5BB84);
   outline-offset: 4px;
 }
 
-
-/* =========================================================
-   ABOUT — RESPONSIVE
-   ========================================================= */
+/* ABOUT — RESPONSIVE */
 
 @media (max-width: 650px) {
 
@@ -1570,4 +1497,318 @@ p  { color: var(--color-text); }
   padding: 20px;
   border-radius: 8px;
   min-width: 300px;
+}
+
+/* HOME — Nouvelle direction artistique */
+/* Header — Home */
+
+.home-page .site-header {
+  position: absolute;
+  z-index: 20;
+  top: 0;
+  left: 0;
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 22px clamp(24px, 5vw, 80px);
+
+  background: linear-gradient(
+    to bottom,
+    rgba(8, 29, 42, 0.92) 0%,
+    rgba(8, 29, 42, 0.55) 55%,
+    rgba(8, 29, 42, 0) 100%
+  );
+}
+
+/* On neutralise l'ancien badge crème du logo */
+.home-page .site-logo {
+  display: block;
+  padding: 0;
+
+  background: transparent;
+  border-radius: 0;
+}
+
+.home-page .site-logo picture {
+  display: block;
+}
+
+.home-page .site-logo img {
+  width: clamp(180px, 16vw, 280px);
+  height: auto;
+  object-fit: contain;
+}
+
+/* Navigation */
+.home-page .main-nav ul {
+  display: flex;
+  align-items: center;
+  gap: clamp(22px, 3vw, 48px);
+}
+
+.home-page .main-nav a {
+  position: relative;
+
+  padding: 8px 2px;
+
+  color: var(--color-cream-light);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  border: 0;
+  opacity: 0.9;
+
+  transition:
+    color 0.25s var(--ease),
+    opacity 0.25s var(--ease);
+}
+
+.home-page .main-nav a::after {
+  content: "";
+
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+
+  width: 0;
+  height: 1px;
+
+  background: var(--color-gold-light);
+
+  transform: translateX(-50%);
+  transition: width 0.25s var(--ease);
+}
+
+.home-page .main-nav a:hover {
+  color: var(--color-gold-light);
+  opacity: 1;
+}
+
+.home-page .main-nav a:hover::after {
+  width: 100%;
+}
+
+
+/* Hero */
+
+.home-page .hero {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+
+  margin: 0;
+  padding:
+    clamp(130px, 16vh, 190px)
+    clamp(24px, 7vw, 120px)
+    clamp(70px, 10vh, 120px);
+
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(7, 28, 41, 0.72) 0%,
+      rgba(7, 28, 41, 0.36) 38%,
+      rgba(7, 28, 41, 0.03) 65%
+    ),
+    url("../ressources-design/V1-homepage_fond.png");
+
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+
+/* Contenu */
+.home-page .hero-content {
+  position: relative;
+  z-index: 2;
+  width: min(1000px, 60vw);
+}
+
+
+/* Petit titre */
+.home-page .hero-kicker {
+  margin: 0 0 18px;
+
+  color: var(--color-gold-light);
+
+  font-size: clamp(0.72rem, 1vw, 0.9rem);
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+
+/* Titre principal */
+.home-page .hero h1 {
+  max-width: 900px;
+
+  color: var(--color-cream-light);
+
+  font-family: var(--font-title);
+  font-size: clamp(5.5rem, 8vw, 8rem);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: 0;
+  text-shadow:
+    0 3px 16px rgba(0, 0, 0, 0.4);
+}
+
+
+/* Description */
+.home-page .hero-content > p:not(.hero-kicker) {
+  max-width: 52ch;
+  margin-top: 28px;
+  color: rgba(240, 232, 219, 0.88);
+  font-family: var(--font-text);
+  font-size: clamp(0.95rem, 1.2vw, 1.08rem);
+  line-height: 1.75;
+}
+
+
+/* CTA principal */
+
+.home-page .hero .button-primary {
+  position: relative;
+
+  margin-top: 34px;
+  padding: 14px 34px;
+
+  overflow: hidden;
+
+  background: var(--color-gold);
+  border: 1px solid var(--color-gold-light);
+  border-radius: 3px;
+
+  color: var(--color-blue-dark);
+
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.2);
+
+  transition:
+    transform 0.25s var(--ease),
+    background 0.25s var(--ease),
+    box-shadow 0.25s var(--ease);
+}
+
+.home-page .hero .button-primary:hover {
+  background: var(--color-gold-light);
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.28);
+}
+
+.home-page .hero .button-primary:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .home-page .hero {
+    min-height: 820px;
+
+    background-position: 62% center;
+  }
+
+  .home-page .hero-content {
+    width: min(540px, 68vw);
+  }
+
+  .home-page .hero h1 {
+    font-size: clamp(3rem, 8vw, 5rem);
+  }
+
+  .home-page .hero-content > p:not(.hero-kicker) {
+    max-width: 36ch;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-page .site-header {
+    padding: 18px 20px;
+  }
+
+  .home-page .site-logo img {
+    width: 52px;
+    height: 52px;
+  }
+
+  .home-page .main-nav ul {
+    gap: 16px;
+  }
+
+  .home-page .main-nav a {
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+  }
+
+  .home-page .hero {
+    align-items: flex-start;
+
+    min-height: 100svh;
+
+    padding: 155px 24px 70px;
+
+    background-image:
+      linear-gradient(
+        90deg,
+        rgba(7, 28, 41, 0.97) 0%,
+        rgba(7, 28, 41, 0.92) 45%,
+        rgba(5, 21, 31, 0.72) 100%,
+        rgba(0, 0, 0, 0.35) 100%
+      ),
+      url("../ressources-design/V1-homepage_fond.png");
+
+    background-size:
+      100% 100%,
+      auto 100%;
+
+    background-position:
+      center,
+      left -900px center;
+
+    background-repeat: no-repeat;
+  }
+
+  .home-page .hero-content {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .home-page .hero h1 {
+    max-width: 340px;
+    font-family: var(--font-title);
+    font-size: clamp(4rem, 14vw, 5.5rem);
+    line-height: 0.95;
+  }
+
+  .home-page .hero-content > p:not(.hero-kicker) {
+    max-width: 28ch;
+    font-family: var(--font-text);
+    font-size: 1rem;
+    line-height: 1.85;
+    color: var(--color-cream-light);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+  }
+
+  .home-page .hero .button-primary {
+    padding: 13px 27px;
+  }
 }
