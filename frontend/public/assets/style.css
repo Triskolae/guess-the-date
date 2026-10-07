@@ -136,18 +136,16 @@ p  { color: var(--color-text); }
   background: var(--color-structure);
 }
 
+.home-page .site-header, .login-page .site-header {
+  background: transparent;
+}
+
 .site-logo {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-cream);
-  color: var(--color-brown-dark);
-  border-radius: var(--radius-pill);
-  font-family: var(--font-heading);
-  font-style: italic;
-  font-size: 1.05rem;
+  display: block;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
   text-decoration: none;
-  line-height: 1;
 }
 
 .main-nav ul {
@@ -1523,20 +1521,11 @@ p  { color: var(--color-text); }
   );
 }
 
-/* On neutralise l'ancien badge crème du logo */
-.home-page .site-logo {
-  display: block;
-  padding: 0;
-
-  background: transparent;
-  border-radius: 0;
-}
-
 .home-page .site-logo picture {
   display: block;
 }
 
-.home-page .site-logo img {
+.site-logo img {
   width: clamp(180px, 16vw, 280px);
   height: auto;
   object-fit: contain;
@@ -1604,6 +1593,7 @@ p  { color: var(--color-text); }
 
   width: 100%;
   max-width: none;
+  margin-inline: 0;
   min-height: 100vh;
 
   margin: 0;
@@ -1745,7 +1735,7 @@ p  { color: var(--color-text); }
     padding: 18px 20px;
   }
 
-  .home-page .site-logo img {
+  .site-logo img {
     width: 52px;
     height: 52px;
   }
