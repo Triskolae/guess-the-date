@@ -1,133 +1,163 @@
-document.addEventListener("DOMContentLoaded", () => {
-  let currentStep = 0;
-  const totalSteps = 4;
+document.addEventListener("DOMContentLoaded", async () => {
+  const baseUrl = window.API_URL || "";
 
-  const steps = document.querySelectorAll(".step");
-  const counter = document.getElementById("step-counter");
-  const form = document.getElementById("onboarding-form");
+  // Éléments du DOM
+  const step1 = document.getElementById("step-1");
+  const step2 = document.getElementById("step-2");
+  const step3 = document.getElementById("step-3");
+  const step4 = document.getElementById("step-4");
 
-  function updateCarousel() {
-    steps.forEach((step, index) => {
-      step.classList.toggle("active", index === currentStep);
-    });
+  const btnToStep2 = document.getElementById("btn-to-step-2");
+  const btnBackTo1 = document.getElementById("btn-back-to-1");
+  const btnToStep3 = document.getElementById("btn-to-step-3");
+  const btnBackTo2 = document.getElementById("btn-back-to-2");
 
-    if (currentStep === 0) {
-      counter.textContent = "";
-    } else {
-      counter.textContent = `${currentStep} / ${totalSteps}`;
-    }
+  const onboardingForm = document.getElementById("onboarding-form");
+
+  // --- 1. Navigation entre les étapes ---
+  function goToStep(showStep) {
+    [step1, step2, step3, step4].forEach((s) => s?.classList.add("hidden"));
+    showStep?.classList.remove("hidden");
   }
 
-  document.querySelectorAll(".btn-next").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      if (validateStep(currentStep)) {
-        if (currentStep < totalSteps) {
-          currentStep++;
-          updateCarousel();
+  btnToStep2?.addEventListener("click", () => goToStep(step2));
+  btnBackTo1?.addEventListener("click", () => goToStep(step1));
+
+  btnToStep3?.addEventListener("click", () => {
+    const selectedEra = document.querySelector('input[name="era_id"]:checked');
+    if (!selectedEra) {
+      alert("Veuillez sélectionner une époque.");
+      return;
+    }
+    goToStep(step3);
+  });
+
+  btnBackTo2?.addEventListener("click", () => goToStep(step2));
+
+  // --- 2. Chargement des données (Eras & Categories) ---
+  try {
+    const response = await fetch(`${baseUrl}/api/onboarding/options`, {
+      credentials: "include",
+    });
+
+    if (!response.ok) throw new Error("Erreur de chargement des options.");
+
+    const { eras, categories } = await response.json();
+
+    renderEras(eras);
+    renderCategories(categories);
+  } catch (error) {
+    console.error("Erreur onboarding :", error);
+  }
+
+  // --- 3. Rendu des Époques (Boutons Radio) ---
+  function renderEras(eras) {
+    const container = document.getElementById("eras-container");
+    if (!container) return;
+
+    container.innerHTML = eras
+      .map(
+        (era, index) => `
+        <label class="option-card">
+          <input type="radio" name="era_id" value="${era.id}" ${index === 0 ? "checked" : ""} />
+          <div class="card-content">
+            <span class="card-title">${era.name}</span>
+            <span class="card-subtitle">${formatEraYears(era.start_year, era.end_year)}</span>
+          </div>
+        </label>
+      `
+      )
+      .join("");
+  }
+
+  function formatEraYears(start, end) {
+    if (start === null && end !== null) return `Avant ${end}`;
+    if (start !== null && end === null) return `Depuis ${start}`;
+    if (start !== null && end !== null) return `${start} à ${end}`;
+    return "";
+  }
+
+  // --- 4. Rendu des Catégories (Checkboxes - Max 3) ---
+  function renderCategories(categories) {
+    const container = document.getElementById("categories-container");
+    if (!container) return;
+
+    container.innerHTML = categories
+      .map(
+        (cat) => `
+        <label class="option-card">
+          <input type="checkbox" name="category_ids" value="${cat.id}" class="category-checkbox" />
+          <div class="card-content">
+            <span class="card-title">${cat.name}</span>
+          </div>
+        </label>
+      `
+      )
+      .join("");
+
+    // Limitation stricte à 3 sélections max
+    const checkboxes = container.querySelectorAll(".category-checkbox");
+    checkboxes.forEach((cb) => {
+      cb.addEventListener("change", () => {
+        const checkedCount = container.querySelectorAll(".category-checkbox:checked").length;
+        if (checkedCount >= 3) {
+          checkboxes.forEach((box) => {
+            if (!box.checked) box.disabled = true;
+          });
+        } else {
+          checkboxes.forEach((box) => (box.disabled = false));
         }
-      }
-    });
-  });
-
-  document.querySelectorAll(".btn-prev").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      if (currentStep > 0) {
-        currentStep--;
-        updateCarousel();
-      }
-    });
-  });
-
-  // Étape 1 : Conditionnel Compétitif
-  const gameOpticInputs = document.querySelectorAll('input[name="gameOptic"]');
-  const modePreference = document.getElementById("mode-preference");
-
-  gameOpticInputs.forEach((input) => {
-    input.addEventListener("change", (e) => {
-      if (e.target.value === "competitif") {
-        modePreference.classList.remove("hidden");
-      } else {
-        modePreference.classList.add("hidden");
-        document
-          .querySelectorAll('input[name="gameMode"]')
-          .forEach((radio) => (radio.checked = false));
-      }
-    });
-  });
-
-  // Étape 3 : Limite à 3 catégories
-  const categoryCheckboxes = document.querySelectorAll(
-    'input[name="categories"]',
-  );
-  categoryCheckboxes.forEach((checkbox) => {
-    checkbox.addEventListener("change", () => {
-      const checkedCount = document.querySelectorAll(
-        'input[name="categories"]:checked',
-      ).length;
-      if (checkedCount > 3) {
-        checkbox.checked = false;
-        alert("Vous pouvez sélectionner 3 catégories au maximum.");
-      }
-    });
-  });
-
-  function validateStep(stepIndex) {
-    if (stepIndex === 1) {
-      const selectedOptic = document.querySelector(
-        'input[name="gameOptic"]:checked',
-      );
-      if (!selectedOptic) {
-        alert("Veuillez sélectionner une optique de jeu.");
-        return false;
-      }
-    }
-    if (stepIndex === 2) {
-      const selectedEra = document.querySelector('input[name="era"]:checked');
-      if (!selectedEra) {
-        alert("Veuillez sélectionner une époque.");
-        return false;
-      }
-    }
-    return true;
-  }
-
-  // Envoi API
-  async function submitPreferences(targetUrl) {
-    const formData = new FormData(form);
-    const payload = {
-      gameOptic: formData.get("gameOptic"),
-      gameMode: formData.get("gameMode") || null,
-      era: formData.get("era"),
-      categories: formData.getAll("categories"),
-    };
-
-    try {
-      const response = await fetch("/api/user/preferences", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
       });
-
-      if (!response.ok) {
-        throw new Error("Erreur serveur lors de la sauvegarde");
-      }
-
-      window.location.href = targetUrl;
-    } catch (error) {
-      console.error("Erreur:", error);
-      alert("Une erreur est survenue lors de l'enregistrement de vos choix.");
-    }
+    });
   }
 
-  document.getElementById("go-game").addEventListener("click", () => {
-    submitPreferences("/game");
-  });
+  // --- 5. Soumission du Formulaire ---
+  if (onboardingForm) {
+    onboardingForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-  document.getElementById("go-home").addEventListener("click", () => {
-    submitPreferences("/home");
-  });
+      const gameMode = document.querySelector('input[name="game_mode"]:checked')?.value;
+      const selectedEraId = parseInt(
+        document.querySelector('input[name="era_id"]:checked')?.value,
+        10
+      );
+      const selectedCategoryIds = Array.from(
+        document.querySelectorAll('input[name="category_ids"]:checked')
+      ).map((cb) => parseInt(cb.value, 10));
 
-  updateCarousel();
+      if (!selectedEraId) {
+        alert("Veuillez choisir une époque.");
+        return;
+      }
+
+      if (selectedCategoryIds.length === 0 || selectedCategoryIds.length > 3) {
+        alert("Veuillez choisir entre 1 et 3 catégories.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${baseUrl}/api/user/preferences`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            game_mode: gameMode,
+            era_ids: [selectedEraId], // Transmis en tableau pour réutiliser la même route API
+            category_ids: selectedCategoryIds,
+          }),
+        });
+
+        if (response.ok) {
+          // Affichage du message de confirmation (Étape 4)
+          goToStep(step4);
+        } else {
+          const data = await response.json();
+          alert(data.message || "Erreur lors de l'enregistrement.");
+        }
+      } catch (error) {
+        console.error("Erreur de sauvegarde :", error);
+        alert("Erreur réseau lors de la sauvegarde.");
+      }
+    });
+  }
 });
