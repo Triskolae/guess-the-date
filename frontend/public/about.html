@@ -3,23 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <meta
       name="description"
       content="Learn more about Guess the Date, a game about objects, history and chronology."
     />
-
     <title>About | Guess the Date</title>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
     <link
       href="https://fonts.googleapis.com/css2?family=Fondamento&family=Imperial+Script&display=swap"
       rel="stylesheet"
     />
-
     <link rel="stylesheet" href="assets/style.css" />
   </head>
 
@@ -27,22 +22,15 @@
     <app-header></app-header>
 
     <main class="about-page">
-
-      <!-- INTRO -->
       <header class="about-header">
-        <p class="page-kicker">About the game</p>
-
-        <h1>Explore history, one object at a time.</h1>
-
+        <h1>About the game</h1>
         <p>
-          Guess the Date is a game where your goal is to discover when
-          different objects were created.
+          Guess the Date is a game where your goal is to discover when different
+          objects were created.
         </p>
       </header>
 
-      <!-- CAROUSEL -->
       <div class="about-carousel">
-
         <button
           class="carousel-button carousel-prev"
           type="button"
@@ -52,16 +40,13 @@
         </button>
 
         <div class="about-sections">
-
           <section class="about-section">
             <h2>How does it work?</h2>
-
             <p>
               Each round presents you with an object. Your goal is to estimate
               the year it was created and get as close as possible to the correct
               date.
             </p>
-
             <p>
               Use your knowledge, observation and intuition to improve your score
               and become better at placing objects in their historical context.
@@ -70,32 +55,25 @@
 
           <section class="about-section">
             <h2>Discover history</h2>
-
             <p>
               From everyday objects to remarkable inventions, Guess the Date lets
               you explore different periods of history through the objects that
               define them.
             </p>
-
-            <p>
-              Every object is an opportunity to discover something new.
-            </p>
+            <p>Every object is an opportunity to discover something new.</p>
           </section>
 
           <section class="about-section">
             <h2>Made for curious minds</h2>
-
             <p>
               Guess the Date is designed for anyone who enjoys history, objects
               and discovering where they fit in time.
             </p>
-
             <p>
               You don't need to be a history expert. Trust your intuition,
               make your guess and learn as you play.
             </p>
           </section>
-
         </div>
 
         <button
@@ -106,17 +84,12 @@
           →
         </button>
 
+        <nav class="carousel-dots" aria-label="Carousel sections">
+          <button class="carousel-dot" type="button" aria-label="Show section 1" aria-pressed="true"></button>
+          <button class="carousel-dot" type="button" aria-label="Show section 2" aria-pressed="false"></button>
+          <button class="carousel-dot" type="button" aria-label="Show section 3" aria-pressed="false"></button>
+        </nav>
       </div>
-
-      <!-- CTA -->
-      <section class="about-cta">
-        <h2>Ready to test your intuition?</h2>
-
-        <a href="game.html" class="play-game button button-primary">
-          Play now
-        </a>
-      </section>
-
     </main>
 
     <footer class="site-footer">
@@ -124,38 +97,44 @@
         <a href="index.html">Home</a>
         <a href="about.html" aria-current="page">About</a>
       </nav>
-
-      <p>Guess the Date</p>
     </footer>
 
     <auth-modal></auth-modal>
 
-    <!-- Scripts -->
     <script src="assets/components.js"></script>
     <script src="assets/auth.js"></script>
     <script src="assets/config.js"></script>
-
     <script>
       const carousel = document.querySelector(".about-sections");
       const prevButton = document.querySelector(".carousel-prev");
       const nextButton = document.querySelector(".carousel-next");
+      const dots = [...document.querySelectorAll(".carousel-dot")];
+      const scrollStep = () => carousel.clientWidth + 20;
 
-      const scrollAmount = () => carousel.clientWidth + 24;
+      function setActiveDot(index) {
+        dots.forEach((dot, dotIndex) => {
+          dot.setAttribute("aria-pressed", String(dotIndex === index));
+        });
+      }
 
       nextButton.addEventListener("click", () => {
-        carousel.scrollBy({
-          left: scrollAmount(),
-          behavior: "smooth"
-        });
+        carousel.scrollBy({ left: scrollStep(), behavior: "smooth" });
       });
 
       prevButton.addEventListener("click", () => {
-        carousel.scrollBy({
-          left: -scrollAmount(),
-          behavior: "smooth"
+        carousel.scrollBy({ left: -scrollStep(), behavior: "smooth" });
+      });
+
+      dots.forEach((dot, index) => {
+        dot.addEventListener("click", () => {
+          carousel.scrollTo({ left: index * scrollStep(), behavior: "smooth" });
         });
       });
-    </script>
 
+      carousel.addEventListener("scroll", () => {
+        const index = Math.round(carousel.scrollLeft / scrollStep());
+        setActiveDot(Math.min(index, dots.length - 1));
+      });
+    </script>
   </body>
 </html>
