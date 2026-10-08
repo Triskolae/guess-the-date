@@ -148,35 +148,33 @@
               CREATE ACCOUNT
             </button>
           </form>
+        </div>
 
-          <!-- Formulaire de Vérification (affiché après inscription) -->
-          <div id="verify-form-container" class="hidden">
-            <h2>Vérification Email</h2>
-            <p>
-              Un code a été envoyé à votre adresse e-mail :
-              <strong id="display-pending-email"></strong>
-            </p>
-            <form id="verify-form" class="auth-form">
-              <div class="form-field">
-                <input
-                  type="text"
-                  id="verify-code"
-                  placeholder="Code à 6 chiffres"
-                  maxlength="6"
-                  required
-                />
-              </div>
-              <button type="submit" class="button button-primary">
-                Valider le code
-              </button>
-            </form>
-            <p>
-              Vous n'avez pas reçu le code ?
-              <button type="button" id="resend-code-btn">
-                Renvoyer le code
-              </button>
-            </p>
-          </div>
+        <!-- Formulaire de Vérification (affiché après inscription) -->
+        <div id="verify-form-container" class="hidden">
+          <h2>Vérification Email</h2>
+          <p>
+            Un code a été envoyé à votre adresse e-mail :
+            <strong id="display-pending-email"></strong>
+          </p>
+          <form id="verify-form" class="auth-form">
+            <div class="form-field">
+              <input
+                type="text"
+                id="verify-code"
+                placeholder="Code à 6 chiffres"
+                maxlength="6"
+                required
+              />
+            </div>
+            <button type="submit" class="button button-primary">
+              Valider le code
+            </button>
+          </form>
+          <p>
+            Vous n'avez pas reçu le code ?
+            <button type="button" id="resend-code-btn">Renvoyer le code</button>
+          </p>
         </div>
 
         <div
@@ -202,29 +200,6 @@
           <span class="logo-sparkle sparkle-3"></span>
         </a>
       </section>
-
-      <!-- Formulaire Code de Vérification (Caché par défaut) -->
-      <div id="verify-form-container" class="hidden">
-        <h2>Vérification Email</h2>
-        <p>
-          Un code a été envoyé à votre adresse e-mail :
-          <strong id="display-pending-email"></strong>
-        </p>
-        <form id="verify-form">
-          <input
-            type="text"
-            id="verify-code"
-            placeholder="Code à 6 chiffres"
-            maxlength="6"
-            required
-          />
-          <button type="submit">Valider le code</button>
-        </form>
-        <p>
-          Vous n'avez pas reçu le code ?
-          <button type="button" id="resend-code-btn">Renvoyer le code</button>
-        </p>
-      </div>
     </main>
 
     <script src="assets/config.js"></script>
