@@ -19,7 +19,23 @@
   </head>
 
   <body class="about-body">
-    <app-header></app-header>
+    <header class="site-header">
+      <a href="index.html" class="site-logo" aria-label="Guess the Date — Home">
+        <picture>
+          <source media="(max-width: 600px)" srcset="ressources-design/LOOP_GuessTheDate_DoreeBlue.png" />
+          <img src="ressources-design/LOGO_GuessTheDate_DoreeBleu.png" alt="Guess the Date" />
+        </picture>
+      </a>
+      <button class="auth-menu-toggle about-menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="about-navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <nav id="about-navigation" class="auth-navigation about-navigation" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="game.html" class="play-game">Play</a>
+        <a href="about.html" aria-current="page">About</a>
+        <a href="login.html">Log in</a>
+      </nav>
+    </header>
 
     <main class="about-page">
       <header class="about-header">
@@ -116,6 +132,23 @@
 
     <auth-modal></auth-modal>
 
+    <script>
+      (() => {
+        const button = document.querySelector('.about-menu-toggle');
+        const menu = document.querySelector('#about-navigation');
+        function setOpen(open) {
+          menu.classList.toggle('open', open);
+          button.setAttribute('aria-expanded', String(open));
+          button.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+        }
+        button.addEventListener('click', () => setOpen(!menu.classList.contains('open')));
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+        document.addEventListener('click', e => {
+          if (!button.contains(e.target) && !menu.contains(e.target)) setOpen(false);
+        });
+        menu.addEventListener('click', e => { if (e.target.closest('a')) setOpen(false); });
+      })();
+    </script>
     <script src="assets/components.js"></script>
     <script src="assets/auth.js"></script>
     <script src="assets/config.js"></script>
