@@ -35,6 +35,12 @@ registerTab.addEventListener("click", () => {
   showAuthPanel(registerTab, registerPanel, loginTab, loginPanel);
 });
 
+const urlParams = new URLSearchParams(window.location.search);
+
+if (urlParams.get("tab") === "register") {
+  showAuthPanel(registerTab, registerPanel, loginTab, loginPanel);
+}
+
 document.querySelectorAll(".logo-sparkle").forEach((sparkle) => {
   function triggerSparkle() {
     sparkle.classList.add("sparkle-active");
