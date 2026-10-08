@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Onboarding</title>
+    <link rel="stylesheet" href="assets/style.css" />
+  </head>
+  <body class="onboarding">
+    <main class="onboarding-wrapper">
+      <article class="card">
+        <!-- Header interne à la carte : Compteur -->
+        <header class="card-header">
+          <span id="step-counter"></span>
+        </header>
+
+        <form id="onboarding-form">
+          <!-- Étape 0 : Intro -->
+          <section class="step active" data-step="0">
+            <h2>Bienvenue !</h2>
+            <p>
+              Ce questionnaire nous permet d'affiner ton expérience utilisateur
+              dans les choix et le référencement qui te seront proposés.
+            </p>
+            <button type="button" class="btn-next">Commencer</button>
+          </section>
+
+          <!-- Étape 1 : Profil de jeu -->
+          <section class="step" data-step="1">
+            <h2>1/4 - Optique de jeu</h2>
+            <p>Comment souhaites-tu jouer ?</p>
+            <div class="options-group">
+              <label
+                ><input type="radio" name="gameOptic" value="chill" required />
+                Chill</label
+              >
+              <label
+                ><input type="radio" name="gameOptic" value="educatif" />
+                Éducatif</label
+              >
+              <label
+                ><input type="radio" name="gameOptic" value="competitif" />
+                Compétitif</label
+              >
+            </div>
+
+            <!-- Conditionnel : SI Compétitif -->
+            <div id="mode-preference" class="conditional-step hidden">
+              <p>Préférence de mode :</p>
+              <label
+                ><input type="radio" name="gameMode" value="solo" /> Solo</label
+              >
+              <label
+                ><input type="radio" name="gameMode" value="multi" />
+                Multi</label
+              >
+            </div>
+
+            <div class="nav-buttons">
+              <button type="button" class="btn-prev">Précédent</button>
+              <button type="button" class="btn-next">Suivant</button>
+            </div>
+          </section>
+
+          <!-- Étape 2 : Époque -->
+          <section class="step" data-step="2">
+            <h2>2/4 - Époque préférée</h2>
+            <p>Sélectionne une époque :</p>
+            <div class="options-group">
+              <label
+                ><input type="radio" name="era" value="prehistoire" required />
+                Préhistoire</label
+              >
+              <label
+                ><input type="radio" name="era" value="antiquite" />
+                Antiquité</label
+              >
+              <label
+                ><input type="radio" name="era" value="moyen-age" /> Moyen
+                Âge</label
+              >
+              <label
+                ><input type="radio" name="era" value="contemporain" /> Époque
+                Contemporaine</label
+              >
+            </div>
+
+            <div class="nav-buttons">
+              <button type="button" class="btn-prev">Précédent</button>
+              <button type="button" class="btn-next">Suivant</button>
+            </div>
+          </section>
+
+          <!-- Étape 3 : Catégories -->
+          <section class="step" data-step="3">
+            <h2>3/4 - Thématiques & Catégories</h2>
+            <p>Choisis jusqu'à 3 catégories maximum :</p>
+            <div class="options-group checkbox-group">
+              <label
+                ><input type="checkbox" name="categories" value="arts" />
+                Arts</label
+              >
+              <label
+                ><input type="checkbox" name="categories" value="science" />
+                Science</label
+              >
+              <label
+                ><input type="checkbox" name="categories" value="daily_life" />
+                Vie quotidienne</label
+              >
+              <label
+                ><input type="checkbox" name="categories" value="histoire" />
+                Histoire</label
+              >
+            </div>
+
+            <div class="nav-buttons">
+              <button type="button" class="btn-prev">Précédent</button>
+              <button type="button" class="btn-next">Suivant</button>
+            </div>
+          </section>
+
+          <!-- Étape 4 : Confirmation -->
+          <section class="step" data-step="4">
+            <h2>4/4 - Merci !</h2>
+            <p>
+              Vos préférences ont bien été enregistrées. Où souhaitez-vous aller
+              maintenant ?
+            </p>
+            <div class="final-choices">
+              <button type="button" id="go-game" class="btn-submit">
+                Aller au jeu
+              </button>
+              <button type="button" id="go-home" class="btn-submit secondary">
+                Page d'accueil
+              </button>
+            </div>
+          </section>
+        </form>
+      </article>
+    </main>
+
+    <script src="assets/onboarding.js"></script>
+  </body>
+</html>
