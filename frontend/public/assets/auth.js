@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (response.ok) {
           modal?.classList.add("hidden");
-          window.location.href = "game.html";
+          window.location.href = "onboarding.html";
         } else {
           showFeedback(data.error || "Code invalide ou expiré.", true);
         }
