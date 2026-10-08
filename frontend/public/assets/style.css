@@ -2030,3 +2030,45 @@ p  { color: var(--color-text); }
     padding: 13px 27px;
   }
 }
+
+body.onboarding {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f4f4f9;
+}
+
+.onboarding .card {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 480px;
+}
+
+.onboarding .card-header {
+    text-align: right;
+    font-weight: bold;
+    min-height: 1.5rem;
+}
+
+.onboarding .step {
+    display: none;
+}
+
+.onboarding .step.active {
+    display: block;
+}
+
+.onboarding .hidden {
+    display: none;
+}
+
+.onboarding .nav-buttons, .final-choices {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 10px;
+}
