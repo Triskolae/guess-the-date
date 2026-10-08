@@ -125,10 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (switchToRegister) {
     switchToRegister.addEventListener("click", (e) => {
       e.preventDefault();
-      clearFeedback();
-      loginContainer?.classList.add("hidden");
-      registerContainer?.classList.remove("hidden");
-      verifyContainer?.classList.add("hidden");
+      window.location.href = "login.html?tab=register";
     });
   }
 
