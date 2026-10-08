@@ -3,91 +3,108 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <meta
       name="description"
       content="Learn more about Guess the Date, a game about objects, history and chronology."
     />
-
     <title>About | Guess the Date</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Beau+Rivage&family=Cormorant+Infant:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Eagle+Lake&family=Fondamento:ital@0;1&family=Great+Vibes&family=Imperial+Script&family=Italianno&family=MonteCarlo&family=Quintessential&family=Updock&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fondamento&family=Imperial+Script&display=swap"
       rel="stylesheet"
-    >
-
+    />
     <link rel="stylesheet" href="assets/style.css" />
   </head>
 
-  <body>
+  <body class="about-body">
     <app-header></app-header>
 
     <main class="about-page">
       <header class="about-header">
-        <p class="page-kicker">About the game</p>
-
-        <h1>Explore history, one object at a time.</h1>
-
+        <h1>About the game</h1>
         <p>
-          Guess the Date is a general knowledge game where your goal is to
-          identify when an object was created.
+          Guess the Date is a game where your goal is to discover when different
+          objects were created.
         </p>
       </header>
 
-      <section class="about-section">
-        <h2>How does it work?</h2>
+      <div class="about-carousel">
+        <button
+          class="carousel-button carousel-prev"
+          type="button"
+          aria-label="Previous section"
+        >
+          ←
+        </button>
 
-        <p>
-          Each round presents you with an object. Enter the year you think it
-          was created and use the feedback and clues to get closer to the
-          correct date.
-        </p>
+        <div class="about-sections">
+          <section class="about-section">
+            <h2>How does it work?</h2>
+            <p>
+              Each round presents you with an object. Your goal is to estimate
+              the year it was created and get as close as possible to the correct
+              date.
+            </p>
+            <p>
+              Use your knowledge, observation and intuition to improve your score
+              and become better at placing objects in their historical context.
+            </p>
+          </section>
 
-        <p>
-          The goal is not only to find the right answer, but also to develop a
-          better sense of chronology as you play.
-        </p>
-      </section>
+          <section class="about-section">
+            <h2>Discover history</h2>
+            <p>
+              From everyday objects to remarkable inventions, Guess the Date lets
+              you explore different periods of history through the objects that
+              define them.
+            </p>
+            <p>Every object is an opportunity to discover something new.</p>
+          </section>
 
-      <section class="about-section">
-        <h2>Learn while playing</h2>
+          <section class="about-section">
+            <h2>Made for curious minds</h2>
+            <p>
+              Guess the Date is designed for anyone who enjoys history, objects
+              and discovering where they fit in time.
+            </p>
+            <p>
+              You don't need to be a history expert. Trust your intuition,
+              make your guess and learn as you play.
+            </p>
+          </section>
+        </div>
 
-        <p>
-          From ancient objects to modern inventions, Guess the Date invites you
-          to explore different periods of history through the objects that
-          shaped them.
-        </p>
+        <button
+          class="carousel-button carousel-next"
+          type="button"
+          aria-label="Next section"
+        >
+          →
+        </button>
 
-        <p>
-          Progress through historical eras, discover rare objects and unlock
-          achievements along the way.
-        </p>
-      </section>
-
-      <section class="about-section">
-        <h2>Made for curious minds</h2>
-
-        <p>
-          Guess the Date is designed to make culture and history approachable
-          through observation, intuition and discovery.
-        </p>
-
-        <p>
-          No history degree required — just take a guess and see where it takes
-          you.
-        </p>
-      </section>
-
-      <section class="about-cta">
-        <h2>Ready to test your intuition?</h2>
-
-        <a href="game.html" class="play-game button button-primary">
-          Play now
-        </a>
-      </section>
+        <nav class="carousel-dots" aria-label="Carousel sections">
+          <button
+            class="carousel-dot"
+            type="button"
+            aria-label="Show section 1"
+            aria-pressed="true"
+          ></button>
+          <button
+            class="carousel-dot"
+            type="button"
+            aria-label="Show section 2"
+            aria-pressed="false"
+          ></button>
+          <button
+            class="carousel-dot"
+            type="button"
+            aria-label="Show section 3"
+            aria-pressed="false"
+          ></button>
+        </nav>
+      </div>
     </main>
 
     <footer class="site-footer">
@@ -95,8 +112,6 @@
         <a href="index.html">Home</a>
         <a href="about.html" aria-current="page">About</a>
       </nav>
-
-      <p>Guess the Date</p>
     </footer>
 
     <auth-modal></auth-modal>
@@ -104,5 +119,40 @@
     <script src="assets/components.js"></script>
     <script src="assets/auth.js"></script>
     <script src="assets/config.js"></script>
+    <script>
+      const carousel = document.querySelector(".about-sections");
+      const prevButton = document.querySelector(".carousel-prev");
+      const nextButton = document.querySelector(".carousel-next");
+      const dots = [...document.querySelectorAll(".carousel-dot")];
+      const scrollStep = () => {
+        const gap = parseFloat(getComputedStyle(carousel).columnGap) || 0;
+        return carousel.clientWidth + gap;
+      };
+
+      function setActiveDot(index) {
+        dots.forEach((dot, dotIndex) => {
+          dot.setAttribute("aria-pressed", String(dotIndex === index));
+        });
+      }
+
+      nextButton.addEventListener("click", () => {
+        carousel.scrollBy({ left: scrollStep(), behavior: "smooth" });
+      });
+
+      prevButton.addEventListener("click", () => {
+        carousel.scrollBy({ left: -scrollStep(), behavior: "smooth" });
+      });
+
+      dots.forEach((dot, index) => {
+        dot.addEventListener("click", () => {
+          carousel.scrollTo({ left: index * scrollStep(), behavior: "smooth" });
+        });
+      });
+
+      carousel.addEventListener("scroll", () => {
+        const index = Math.round(carousel.scrollLeft / scrollStep());
+        setActiveDot(Math.min(index, dots.length - 1));
+      });
+    </script>
   </body>
 </html>
