@@ -9,7 +9,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
 const getDbConfig = () => {
-  const password = process.env.DB_PASSWORD || process.env.POSTGRES_PASSWORD;
+  const password = process.env.DB_PASSWORD;
 
   if (!password) {
     console.error(`❌ ERREUR: DB_PASSWORD introuvable pour DB_HOST=${process.env.DB_HOST}`);

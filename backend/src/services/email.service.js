@@ -10,7 +10,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 async function sendVerificationEmail(to, code) {
   try {
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || "Guess The Date <onboarding@resend.dev>",
+      from: process.env.EMAIL_FROM || "Guess The Date <no-reply@guess-the-date.online>",
       to: [to],
       subject: "🔑 Votre code de vérification - Guess The Date",
       html: `
