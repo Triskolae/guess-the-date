@@ -5,16 +5,30 @@
   "description": "* **Culture générale et histoire des sciences/techniques** : Permettre aux joueurs de découvrir ou de réviser l'histoire des objets du quotidien, des inventions majeures et des œuvres d'art à travers les époques.\r * **Repères chronologiques** : Aider à développer une meilleure perception des époques historiques et des étapes de l'évolution technologique et culturelle.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "start": "npm run migrate:prod && node server.js",
+    "dev": "node --watch server.js",
+    "migrate:make": "knex migrate:make --knexfile knexfile.js",
+    "migrate:preprod": "knex migrate:latest --env staging --knexfile knexfile.js",
+    "migrate:prod": "knex migrate:latest --env production --knexfile knexfile.js",
+    "migrate:rollback:preprod": "knex migrate:rollback --env staging --knexfile knexfile.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
+    "dotenv": "^18.0.5",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "knex": "^3.3.0",
+    "morgan": "^1.12.1",
+    "nodemailer": "^10.0.15",
+    "nodemailer-express-handlebars": "^7.0.0",
+    "pg": "^8.23.1",
+    "resend": "^6.32.0",
     "socket.io": "^4.8.4"
   }
 }

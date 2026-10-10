@@ -11,43 +11,78 @@
 
     <title>Log in | Guess the Date</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Beau+Rivage&family=Cormorant+Infant:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Eagle+Lake&family=Fondamento:ital@0;1&family=Great+Vibes&family=Imperial+Script&family=Italianno&family=MonteCarlo&family=Quintessential&family=Updock&display=swap"
+      rel="stylesheet"
+    />
+
     <link rel="stylesheet" href="assets/style.css" />
   </head>
 
-  <body>
-    <header class="site-header">
-      <a href="index.html" class="site-logo">Guess the Date</a>
+  <body class="login-page">
+    <button
+      class="auth-menu-toggle"
+      type="button"
+      aria-label="Open navigation"
+      aria-expanded="false"
+      aria-controls="auth-navigation"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
 
-      <nav class="main-nav" aria-label="Main navigation">
-        <ul>
-          <li>
-            <a href="game.html">Play</a>
-          </li>
-          <li>
-            <a href="about.html">About</a>
-          </li>
-          <li>
-            <a href="login.html" aria-current="page">Log in</a>
-          </li>
-        </ul>
-      </nav>
-    </header>
+    <nav
+      id="auth-navigation"
+      class="auth-navigation"
+      aria-label="Main navigation"
+    >
+      <a href="index.html">Home</a>
+      <a href="game.html" class="play-game">Play</a>
+      <a href="about.html">About</a>
+    </nav>
 
     <main class="auth-page">
-      <section class="auth-introduction">
-        <h1>Welcome to Guess the Date</h1>
+      <section class="auth-panel">
+        <div class="auth-tabs" role="tablist" aria-label="Authentication">
+          <button
+            class="auth-tab active"
+            type="button"
+            id="login-tab"
+            role="tab"
+            aria-selected="true"
+            aria-controls="login-panel"
+          >
+            Log in
+          </button>
 
-        <p>
-          Log in to access your account, or create one to keep track of your
-          progress and achievements.
-        </p>
-      </section>
+          <button
+            class="auth-tab"
+            type="button"
+            id="register-tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="register-panel"
+          >
+            Create an account
+          </button>
+        </div>
 
-      <div class="auth-container">
-        <section class="auth-section login-section">
-          <h2>Log in</h2>
+        <div
+          id="login-panel"
+          class="auth-form-panel"
+          role="tabpanel"
+          aria-labelledby="login-tab"
+        >
+          <div class="auth-heading">
+            <h1>Welcome back</h1>
+            <p>Ready to put your sense of history to the test ?</p>
+          </div>
 
-          <form class="auth-form" id="login-form">
+          <form class="auth-form" id="page-login-form">
             <div class="form-field">
               <label for="login-email">Email</label>
 
@@ -72,34 +107,26 @@
               />
             </div>
 
-            <button type="submit" class="button button-primary">
-              Log in
-            </button>
+            <button type="submit" class="button button-primary">LOG IN</button>
           </form>
-        </section>
+        </div>
+        <div
+          id="register-panel"
+          class="auth-form-panel hidden"
+          role="tabpanel"
+          aria-labelledby="register-tab"
+        >
+          <div class="auth-heading">
+            <h1>Join the investigation</h1>
+            <p>Create your account and start tracking your progress.</p>
+          </div>
 
-        <section class="auth-section signup-section">
-          <h2>Create an account</h2>
-
-          <form class="auth-form" id="signup-form">
+          <form class="auth-form" id="page-register-form">
             <div class="form-field">
-              <label for="signup-username">Username</label>
-
-              <input
-                type="text"
-                id="signup-username"
-                name="username"
-                autocomplete="username"
-                required
-              />
-            </div>
-
-            <div class="form-field">
-              <label for="signup-email">Email</label>
-
+              <label for="register-email">Email</label>
               <input
                 type="email"
-                id="signup-email"
+                id="register-email"
                 name="email"
                 autocomplete="email"
                 required
@@ -107,48 +134,77 @@
             </div>
 
             <div class="form-field">
-              <label for="signup-password">Password</label>
-
+              <label for="register-password">Password</label>
               <input
                 type="password"
-                id="signup-password"
+                id="register-password"
                 name="password"
                 autocomplete="new-password"
                 required
               />
             </div>
 
-            <div class="form-field">
-              <label for="signup-password-confirmation">
-                Confirm password
-              </label>
+            <button type="submit" class="button button-primary">
+              CREATE ACCOUNT
+            </button>
+          </form>
+        </div>
 
+        <!-- Formulaire de Vérification (affiché après inscription) -->
+        <div id="verify-form-container" class="hidden">
+          <h2>Vérification Email</h2>
+          <p>
+            Un code a été envoyé à votre adresse e-mail :
+            <strong id="display-pending-email"></strong>
+          </p>
+          <form id="verify-form" class="auth-form">
+            <div class="form-field">
               <input
-                type="password"
-                id="signup-password-confirmation"
-                name="password-confirmation"
-                autocomplete="new-password"
+                type="text"
+                id="verify-code"
+                placeholder="Code à 6 chiffres"
+                maxlength="6"
                 required
               />
             </div>
-
             <button type="submit" class="button button-primary">
-              Create account
+              Valider le code
             </button>
           </form>
-        </section>
-      </div>
+          <p>
+            Vous n'avez pas reçu le code ?
+            <button type="button" id="resend-code-btn">Renvoyer le code</button>
+          </p>
+        </div>
+
+        <div
+          id="page-auth-feedback"
+          class="auth-feedback-msg hidden"
+          aria-live="polite"
+        ></div>
+      </section>
+
+      <section class="auth-brand">
+        <a
+          href="index.html"
+          class="auth-brand-logo"
+          aria-label="Guess the Date — Home"
+        >
+          <img
+            src="ressources-design/LOGO_GuessTheDate_DoreeBleu.png"
+            alt="Guess the Date"
+          />
+
+          <span class="logo-sparkle sparkle-1"></span>
+          <span class="logo-sparkle sparkle-2"></span>
+          <span class="logo-sparkle sparkle-3"></span>
+        </a>
+      </section>
     </main>
 
-    <footer class="site-footer">
-      <nav aria-label="Footer navigation">
-        <a href="index.html">Home</a>
-        <a href="about.html">About</a>
-      </nav>
-
-      <p>Guess the Date</p>
-    </footer>
-
     <script src="assets/config.js"></script>
+    <script src="assets/components.js"></script>
+    <script src="assets/auth.js"></script>
+    <script src="assets/login.js"></script>
   </body>
 </html>

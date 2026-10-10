@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Onboarding</title>
+    <link rel="stylesheet" href="assets/style.css" />
+  </head>
+  <body class="onboarding">
+    <main class="onboarding-wrapper">
+      <article class="card">
+        <!-- Header interne à la carte : Compteur -->
+        <header class="card-header">
+          <span id="step-counter"></span>
+        </header>
+        <form id="onboarding-form">
+          <!-- Étape 1 : Mode / Optique de jeu -->
+          <section id="step-1" class="onboarding-step">
+            <h2>Choisissez votre mode de jeu</h2>
+            <div class="options-grid">
+              <label class="option-card">
+                <input type="radio" name="game_mode" value="casual" checked />
+                <div class="card-content">
+                  <span class="card-title">Détente</span>
+                  <span class="card-subtitle"
+                    >Jouez sans pression et à votre rythme</span
+                  >
+                </div>
+              </label>
+              <label class="option-card">
+                <input type="radio" name="game_mode" value="competitive" />
+                <div class="card-content">
+                  <span class="card-title">Compétitif</span>
+                  <span class="card-subtitle"
+                    >Parties chronométrées et classement</span
+                  >
+                </div>
+              </label>
+            </div>
+            <div class="step-actions">
+              <button
+                type="button"
+                class="button button-primary"
+                id="btn-to-step-2"
+              >
+                Suivant
+              </button>
+            </div>
+          </section>
+
+          <!-- Étape 2 : Époque (Bouton Radio) -->
+          <section id="step-2" class="onboarding-step hidden">
+            <h2>Choisissez votre époque principale</h2>
+            <div id="eras-container" class="options-grid">
+              <!-- Injecté dynamiquement en radio buttons -->
+            </div>
+            <div class="step-actions">
+              <button
+                type="button"
+                class="button button-secondary"
+                id="btn-back-to-1"
+              >
+                Retour
+              </button>
+              <button
+                type="button"
+                class="button button-primary"
+                id="btn-to-step-3"
+              >
+                Suivant
+              </button>
+            </div>
+          </section>
+
+          <!-- Étape 3 : Catégories (Checkboxes - Max 3) -->
+          <section id="step-3" class="onboarding-step hidden">
+            <h2>Choisissez vos thématiques (3 max)</h2>
+            <p class="step-hint">Sélectionnez entre 1 et 3 catégories.</p>
+            <div id="categories-container" class="options-grid">
+              <!-- Injecté dynamiquement en checkboxes -->
+            </div>
+            <div class="step-actions">
+              <button
+                type="button"
+                class="button button-secondary"
+                id="btn-back-to-2"
+              >
+                Retour
+              </button>
+              <button type="submit" class="button button-primary">
+                Valider mes choix
+              </button>
+            </div>
+          </section>
+
+          <!-- Étape 4 : Message de confirmation -->
+          <section id="step-4" class="onboarding-step hidden">
+            <h2>Configuration terminée !</h2>
+            <p>Vos préférences ont bien été enregistrées.</p>
+            <div class="step-actions final-actions">
+              <a href="index.html" class="button button-secondary"
+                >Page d'accueil</a
+              >
+              <a href="game.html" class="button button-primary"
+                >Lancer une partie</a
+              >
+            </div>
+          </section>
+        </form>
+      </article>
+    </main>
+
+    <script src="assets/config.js"></script>
+    <script src="assets/onboarding.js"></script>
+  </body>
+</html>

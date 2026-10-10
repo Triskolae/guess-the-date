@@ -6,25 +6,23 @@
 
 ### 1.1 Objectif Pédagogique
 
--   **Culture générale et histoire des sciences/techniques :** Permettre
-    aux joueurs de découvrir ou de réviser l'histoire des objets du
-    quotidien, des inventions majeures et des œuvres d'art à travers les
-    époques.
--   **Repères chronologiques :** Aider à développer une meilleure
-    perception des époques historiques et des étapes de l'évolution
-    technologique et culturelle.
+- **Culture générale et histoire des sciences/techniques :** permettre aux joueurs de découvrir ou de réviser l'histoire des objets du quotidien, des inventions majeures et des œuvres d'art à travers les époques.
+- **Repères chronologiques :** développer une meilleure perception des périodes historiques et de l'évolution technologique et culturelle.
+- **Découverte documentée :** associer à chaque objet une référence historique et une source documentaire consultable.
 
 ### 1.2 Objectif Ludique
 
--   **Accessibilité immédiate :** Proposer un gameplay simple et
-    intuitif (*"pick up and play"*) ne nécessitant aucune installation
-    préalable.
--   **Mécanique d'engagement (Chaud / Froid) :** Offrir une rétroaction
-    dynamique et progressive stimulant le questionnement et
-    l'apprentissage par essais-erreurs.
--   **Progression et défi :** Inciter le joueur à améliorer sa précision
-    et à utiliser judicieusement ses essais avant d'atteindre les
-    indices.
+- **Accessibilité immédiate :** proposer un jeu web simple et intuitif (*pick up and play*), sans installation.
+- **Mécanique d'engagement (Chaud / Froid) :** guider le joueur par une rétroaction progressive fondée sur l'écart entre la proposition et l'année attendue.
+- **Progression et défi :** inciter à affiner ses estimations, à utiliser les indices et à améliorer sa connaissance des époques.
+
+### 1.3 Périmètre de la V0
+
+La priorité du MVP est une **boucle de jeu solo fonctionnelle** :
+
+**Objet → proposition d'année → calcul de l'écart → indication chaud/froid → indices progressifs → victoire → objet suivant.**
+
+La banque d'objets, la frise, la navigation, l'intégration graphique et la recette du parcours constituent le chemin critique. Les statistiques, badges et fonctionnalités avancées du compte pourront être finalisés en **V0.5**. Le multijoueur compétitif constitue une évolution ultérieure.
 
 ---
 
@@ -32,790 +30,793 @@
 
 ### 2.1 Spécifications Techniques
 
--   **Format :** Application Web avec un Front-End léger en HTML5, CSS3
-    et JavaScript ES6 Vanilla.
--   **Back-End :** Serveur Node.js avec Express.
--   **Architecture :** Séparation entre les ressources statiques du
-    Front-End et la logique serveur.
--   **Compatibilité :** Responsive Design (Desktop, Tablette,
-    Smartphone) et support des navigateurs modernes.
--   **Communication Front-End / Back-End :** API HTTP/REST au format
-    JSON.
--   **Stockage des données :** API externes + base de données locale ou
-    distante selon les besoins du projet.
--   **Sources de données envisagées :**
-    -   Cooper Hewitt API
-    -   Wikidata
--   **Données associées aux objets :**
-    -   Titre ;
-    -   Année de création/invention ;
-    -   URL de l'image ;
-    -   Siècle ;
-    -   Auteur, inventeur ou créateur ;
-    -   Catégorie/type d'objet ;
-    -   Source ;
-    -   Type de licence ;
-    -   Informations complémentaires.
--   **Scores :** Les scores pourront être persistés en base de données
-    dans une version ultérieure.
+- **Format :** application web multipage en HTML5, CSS3 et JavaScript ES6+ Vanilla, sans framework Front-End.
+- **Back-End :** Node.js, Express, architecture de routes/contrôleurs/services.
+- **Communication :** API HTTP/REST au format JSON ; CORS configuré pour les origines autorisées.
+- **Authentification :** inscription, connexion et vérification de l'adresse e-mail par code OTP ; sessions via JWT en cookie `HttpOnly`.
+- **Base de données :** PostgreSQL sur Supabase, accès avec Knex.js, migrations versionnées et séparation des schémas `preprod` / `public`.
+- **E-mails :** envoi transactionnel via Resend.
+- **Temps réel :** dépendance Socket.IO installée ; fonctionnalités de parties multijoueurs **non implémentées dans le serveur actuel**.
+- **Compatibilité :** navigateurs modernes ; objectif responsive ordinateur, tablette et smartphone.
+- **Hébergement :** Front-End Cloudflare Pages, Back-End Northflank (Docker), données Supabase.
+- **Sources de données envisagées :** Wikidata et Cooper Hewitt API, sous réserve de normalisation et de vérification des droits.
 
-### 2.2 Composants de l'Interface Utilisateur (UI)
+### 2.2 Composants de l'Interface Utilisateur
 
--   **Zone Médias :** Affichage central de l'image de l'objet à deviner
-    avec crédits d'auteur/source.
--   **Zone de Saisie :** Champ d'entrée numérique réservé aux années
-    (supportant les valeurs positives et négatives/BC).
--   **Zone d'Action :** Bouton de validation (« Valider ») et bouton de
-    passage (« Suivant / Objet suivant »).
--   **Zone de Rétroaction :** Indication visuelle et textuelle du niveau
-    de proximité (Système Chaud/Froid).
--   **Zone d'Indices :** Zone de texte se débloquant automatiquement
-    selon le nombre d'essais infructueux.
+- **Zone Médias :** image et nom de l'objet mystère, avec solution de repli si l'image est indisponible.
+- **Zone de Saisie :** année entière positive ou négative, pour prendre en charge les dates avant notre ère.
+- **Zone d'Action :** validation de la proposition et passage à l'objet suivant après résolution.
+- **Zone de Rétroaction :** proximité « chaud/froid » et direction vers une année plus ancienne ou plus récente.
+- **Zone d'Indices :** révélation automatique après certains essais infructueux.
+- **Frise Chronologique :** curseur, graduations et échelle évolutive.
+- **Navigation :** pages Home, Play, Login, Account, Badges, Settings et About ; un parcours de vérification reste nécessaire pour assurer la cohérence globale.
 
 ---
 
-## 3. Règles du Jeu (Game Design)
+## 3. Règles du Jeu (*Game Design*)
 
-### 3.1 Déroulement d'une Partie
+### 3.1 Déroulement d'une Manche
 
-1.  Une image d'un objet mystère est présentée au joueur.
-2.  Le joueur saisit une année dans le champ de saisie et valide sa
-    réponse.
-3.  Le système évalue l'écart entre l'année proposée et l'année réelle
-    d'invention/création.
+1. Le joueur découvre un objet mystère.
+2. Il saisit une année et valide sa proposition.
+3. Le système calcule l'écart avec l'année de référence de l'objet courant.
+4. Une indication de proximité et, en cas d'erreur, une direction chronologique sont affichées.
+5. Des indices se débloquent après plusieurs tentatives infructueuses.
+6. Une réponse exacte termine la manche et permet de passer à un nouvel objet.
 
-### 3.2 Mécanique "Chaud / Froid" (Indicateur de proximité)
+Le nombre d'essais, les indices et l'état de la frise doivent être réinitialisés pour chaque nouvel objet.
 
-L'évaluation de la réponse repose sur l'écart absolu :
+### 3.2 Mécanique « Chaud / Froid »
 
-**Écart = \|Année saisie - Année de référence\|**
+L'évaluation repose sur l'écart absolu :
 
-  Écart (années)   Niveau de proximité   Indication
-  ---------------- --------------------- --------------
-  **0**            **Correct** 🥳        Bonne année
-  **1 à 24**       **Burning** 🔥        Très proche
-  **25 à 49**      **Hot** 🥵            Proche
-  **50 à 79**      **Warm** 😎           Assez proche
-  **80 à 99**      **Cold** 🥶           Éloigné
-  **100+**         **Freezing** 🧊       Très éloigné
+**Écart = |Année saisie − Année de référence|**
 
-En complément, le joueur reçoit une indication directionnelle lui
-demandant d'essayer une date **plus récente** ou **plus ancienne**
-lorsque la réponse n'est pas correcte.
+| Écart (années) | Niveau de proximité | Indication |
+|---|---|---|
+| **0** | **Correct 🥳** | Bonne année |
+| **1 à 24** | **Burning 🔥** | Très proche |
+| **25 à 49** | **Hot 🥵** | Proche |
+| **50 à 79** | **Warm 😎** | Assez proche |
+| **80 à 99** | **Cold 🥶** | Éloigné |
+| **100+** | **Freezing 🧊** | Très éloigné |
+
+Une réponse incorrecte s'accompagne d'une indication **older / more recent**. Ces seuils constituent la convention de la gameloop V0 et doivent rester identiques dans le code, les textes et la légende.
 
 ### 3.3 Système d'Indices Progressifs
 
-Les indices de la V0 sont générés automatiquement à partir de l'année de
-référence ; ils ne sont pas stockés dans les données propres à chaque
-objet.
+Les indices V0 sont calculés à partir de l'année de référence ; ils ne sont pas stockés individuellement pour chaque objet.
 
--   **Après 3 essais manqués :** affichage du siècle concerné.
--   **Après 5 essais manqués :** affichage d'une partie de l'année de
-    référence.
+- **Après 3 essais manqués :** révélation du siècle.
+- **Après 5 essais manqués :** révélation partielle de l'année, par exemple `188_` pour `1887`.
 
-Des indices éditoriaux propres à chaque objet pourront être ajoutés
-ultérieurement si le game design évolue.
+La révélation du créateur ou de l'inventeur n'est pas retenue pour la V0. Des indices éditoriaux propres aux objets pourront être envisagés ultérieurement.
 
-### 3.4 Frise chronologique dynamique
+### 3.4 Frise Chronologique Dynamique
 
-La frise accompagne la recherche du joueur sans révéler directement la
-bonne réponse.
+La frise accompagne la recherche sans divulguer directement l'année correcte :
 
--   Chaque proposition positionne le curseur sur l'année saisie.
--   L'échelle temporelle s'adapte progressivement aux essais du joueur.
--   Les bornes sont arrondies par paliers afin de ne pas donner
-    indirectement la réponse.
--   Lorsque les propositions resserrent la zone de recherche, la frise
-    peut zoomer.
--   Si une nouvelle proposition sort de l'échelle affichée, la frise
-    dézoome automatiquement afin de l'inclure.
--   Les graduations sont recalculées lorsque l'échelle change.
--   Les repères textuels **Past / Present** restent fixes et
-    indépendants des bornes numériques.
--   La frise fonctionne conjointement avec l'indication directionnelle
-    **older / more recent**.
+- Le curseur suit chaque proposition.
+- L'échelle s'adapte aux essais successifs.
+- Les bornes sont arrondies par paliers pour éviter de révéler indirectement la solution.
+- La frise zoome lorsque la recherche se resserre et dézoome si une nouvelle proposition sort de l'intervalle affiché.
+- Les graduations sont recalculées lors d'un changement d'échelle.
+- Les repères **Past / Present** restent indépendants des bornes numériques.
+
+**État :** une implémentation JavaScript existe dans `assets/main.js` ; la validation fonctionnelle complète et la recette responsive restent à effectuer.
 
 ---
 
 ## 4. Architecture Technique
 
-Le projet est structuré en **Monorepo** :
+Le projet est structuré en **monorepo** :
 
-``` text
+```text
 guess-the-date/
 ├── frontend/
 │   └── public/
-│       ├── about.html
-│       ├── account.html
-│       ├── badges.html
-│       ├── game.html
-│       ├── index.html
-│       ├── login.html
-│       ├── settings.html
-│       └── assets/
-│           ├── config.js         ← Fichier d'URL d'API dynamique
-│           ├── main.js
-│           ├── style.css
-│           └── img/
-│               ├── gramophone.png
-│               └── uranium.jpg
+│       ├── index.html               # Accueil
+│       ├── game.html                # Jeu solo
+│       ├── login.html               # Connexion / inscription
+│       ├── account.html             # Compte et statistiques (UI)
+│       ├── badges.html              # Badges (UI)
+│       ├── settings.html            # Paramètres (UI)
+│       ├── about.html               # Présentation et carrousel
+│       ├── assets/
+│       │   ├── config.js            # Configuration de l'URL API
+│       │   ├── main.js              # Gameloop et frise
+│       │   ├── game-objects.js      # Objets de démonstration locaux
+│       │   ├── components.js        # Composants d'interface partagés
+│       │   ├── auth.js              # Authentification côté client
+│       │   ├── auth_needed.js       # Contrôle d'accès aux pages
+│       │   ├── login.js             # Interactions de la page Login
+│       │   ├── onboarding.js        # Interactions d'onboarding
+│       │   ├── style.css            # Styles partagés et par page
+│       │   └── img/                 # Images d'objets
+│       └── ressources-design/       # Logos, fonds et éléments graphiques
 │
 ├── backend/
+│   ├── server.js                     # Express, CORS, cookies, health
+│   ├── knexfile.js                   # Configurations PostgreSQL/Knex
+│   ├── Dockerfile                    # Déploiement Northflank
+│   ├── scripts/
+│   │   └── init_db.sql
 │   ├── src/
-│   │   ├── routes/
-│   │   ├── controllers/
-│   │   ├── services/
-│   │   └── data/
-│   ├── server.js
-│   ├── Dockerfile                ← Configuration de build Docker (Northflank)
+│   │   ├── routes/auth.routes.js
+│   │   ├── controllers/auth.controller.js
+│   │   ├── middlewares/auth.middleware.js
+│   │   ├── services/email.service.js
+│   │   ├── utils/otp.util.js
+│   │   └── database/
+│   │       ├── db.js
+│   │       └── migrations/
 │   ├── package.json
 │   └── package-lock.json
 │
-├── package.json                  ← Orchestration dev locale
+├── package.json                      # Orchestration du développement
 ├── package-lock.json
 ├── .gitignore
 └── README.md
 ```
 
-\#### Dossier `frontend/`
+### 4.1 Dossier `frontend/`
 
-Contient uniquement les ressources du Front-End accessibles par le
-navigateur :
+Le navigateur charge des pages HTML indépendantes et leurs ressources CSS/JS. Le projet n'utilise ni SPA ni routeur Front-End. `components.js` contient des éléments d'interface partagés ; certaines pages disposent encore de leur propre navigation. L'harmonisation de l'ensemble reste un chantier de finition.
 
--   HTML ;
--   CSS ;
--   JavaScript côté client ;
--   Images ;
--   Autres ressources statiques.
+### 4.2 Dossier `backend/`
 
-Le Front-End n'utilise actuellement **aucun framework JavaScript**.
+- `server.js` initialise Express, le parsing JSON, les cookies, CORS et le journal de requêtes.
+- `src/routes/` expose les routes d'authentification.
+- `src/controllers/` traite les actions et validations métier.
+- `src/middlewares/` protège les routes authentifiées.
+- `src/services/` regroupe notamment l'envoi des e-mails.
+- `src/database/` centralise Knex et les migrations PostgreSQL.
 
-\#### Dossier `backend/`
+### 4.3 Architecture de Déploiement
 
-Contient le serveur Node.js et toute la logique côté serveur :
+```text
+                          GitHub
+                            │
+             ┌──────────────┴──────────────┐
+             │                             │
+      frontend/public/                 backend/
+             │                             │
+       Cloudflare Pages               Northflank
+       (fichiers statiques)           (Node.js / Docker)
+             │                             │
+             └────── HTTP / JSON ──────────┤
+                                           │
+                                   Supabase PostgreSQL
+                                    ├── preprod
+                                    └── public (prod)
+```
 
--   `server.js` : point d'entrée du serveur Express ;
--   `src/routes/` : routes HTTP/API ;
--   `src/controllers/` : contrôleurs ;
--   `src/services/` : logique métier ;
--   `src/data/` : accès et traitement des données ;
--   `package.json` : dépendances propres au Back-End.
-
-Les futures fonctionnalités temps réel pourront utiliser **Socket.IO**
-côté Back-End.
-
-\#### `package.json` racine
-
-Le `package.json` situé à la racine est utilisé principalement pour
-orchestrer le développement local et lancer simultanément le Front-End
-et le Back-End.
-
-\#### Déploiement
-
-Le monorepo pourra être déployé sur plusieurs services :
-
-                            GitHub
-                               │
-                 ┌─────────────┴─────────────┐
-                 │                           │
-         frontend/public/                backend/
-                 │                           │
-          Cloudflare Pages               Northflank (Docker)
-       (Static CDN Host)             (Node.js + WebSockets)
-                 │                           │
-                 └────────── HTTP / WS ──────┴────── Database (Supabase PostgreSQL)
-
-Le Front-End et le Back-End restent donc dans un **seul repository**,
-tout en pouvant être déployés indépendamment.
+Les deux applications sont versionnées dans le même dépôt, mais peuvent être déployées indépendamment. Le temps réel Socket.IO relève de l'architecture cible ; aucun cycle de match 1v1 n'est exposé par le serveur actuel.
 
 ---
 
 ## 5. Prérequis
 
-\### 5.1 Node.js
+### 5.1 Node.js et npm
 
-Le projet nécessite une version récente de Node.js (il est recommandé
-d'utiliser une version LTS).
+Utiliser une version **LTS récente** de Node.js : <https://nodejs.org/fr/download>.
 
-https://nodejs.org/fr/download
+```bash
+node --version
+npm --version
+```
 
-Vérifier l'installation :
+### 5.2 Git
 
-    node --version
-    npm --version
+```bash
+git --version
+```
 
-\### 5.2 Git
+### 5.3 Dépendances
 
-Git est nécessaire pour récupérer le projet et gérer les versions.
+Le projet possède deux manifestes `package.json` :
 
-Vérifier l'installation :
+- **Racine :** `concurrently` et `browser-sync` pour le développement.
+- **`backend/` :** Express, Knex, PostgreSQL, JWT, bcrypt, Resend et autres dépendances serveur.
 
-    git --version
-
-\### 5.3 Organisation des dépendances
-
-Le projet utilise deux `package.json` distincts :
-
-    guess-the-date/
-    ├── package.json          ← outils de développement / orchestration
-    │
-    ├── frontend/
-    │   └── public/           ← HTML / CSS / JS vanilla
-    │
-    └── backend/
-        ├── package.json      ← dépendances du serveur
-        └── server.js
-
-Les dépendances du Back-End doivent être installées depuis le dossier
-`backend/`.
-
-Les outils de développement communs comme `concurrently` et
-`browser-sync` sont installés à la racine.
+Les dossiers `node_modules/` ne sont pas versionnés.
 
 ---
 
 ## 6. Installation en Local
 
-\### 6.1 Cloner le projet
+### 6.1 Cloner le Dépôt
 
-Depuis le terminal :
+```bash
+git clone https://github.com/Triskolae/guess-the-date.git
+cd guess-the-date
+```
 
-    git clone <URL_DU_REPOSITORY>
-    cd guess-the-date
+Choisir la branche de travail appropriée avant toute modification.
 
-*(Remplacer `<URL_DU_REPOSITORY>` par l'URL réelle du dépôt Git).*
+### 6.2 Installer les Dépendances
 
-\### 6.2 Installer les dépendances
+```bash
+npm install
+cd backend
+npm install
+cd ..
+```
 
-Installer les dépendances de développement à la racine :
+Les dépendances doivent être installées dans les deux emplacements. Ne pas ajouter les dossiers `node_modules/` à Git.
 
-    npm install
-
-Puis installer les dépendances du Back-End :
-
-    cd backend
-    npm install
-    cd ..
-
-Cette organisation permet à chaque partie du projet de conserver ses
-propres dépendances.
-
-## \> ⚠️ Les dossiers `node_modules/` sont ignorés par Git et ne doivent pas être versionnés.
+---
 
 ## 7. Configuration du Projet
 
-\### 7.1 Variables d'environnement
+### 7.1 Variables d'Environnement
 
-Les variables d'environnement du Back-End sont stockées dans un fichier
-`.env` situé dans le dossier `backend/`.
+Le serveur charge notamment les variables depuis `backend/.env` via `dotenv`. Les informations d'accès à la base, les secrets JWT et les clés d'API doivent rester **hors du dépôt Git**.
 
-Exemple :
+Exemple indicatif à adapter à son environnement :
 
-    PORT=3001
+```dotenv
+PORT=3001
+NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
 
-Le fichier `.env` contient potentiellement des informations sensibles et
-ne doit jamais être versionné.
+# Connexion PostgreSQL / Supabase
+DB_HOST=exemple.supabase.com
+DB_PORT=5432
+DB_USER=postgres.exemple
+DB_PASSWORD=remplacer_par_un_secret
+DB_NAME=postgres
 
-\### 7.2 Fichier `.env.example`
+# Authentification et e-mails
+JWT_SECRET=remplacer_par_une_valeur_aleatoire_secrete
+RESEND_API_KEY=remplacer_par_une_cle_valide
+EMAIL_FROM=adresse-verifiee@exemple.com
+```
 
-Un fichier `backend/.env.example` doit être présent dans le repository
-afin de documenter les variables nécessaires.
+`knexfile.js` prend également en charge une connexion par `DATABASE_URL` lorsque `DB_HOST` n'est pas renseigné. Les valeurs ci-dessus sont des **exemples**, pas des identifiants utilisables.
 
-Créer le fichier `.env` à partir du modèle d'exemple :
+### 7.2 Modèle `.env.example`
 
-    cp backend/.env.example backend/.env
+**À compléter :** aucun `backend/.env.example` n'a été identifié dans l'arborescence de référence examinée. Il est recommandé d'en ajouter un sans secrets pour faciliter l'installation des nouveaux contributeurs.
 
-*(Sous Windows, le fichier peut également être créé manuellement).*
+### 7.3 Configuration de l'API côté Front-End
+
+Le fichier `frontend/public/assets/config.js` définit `window.API_URL` selon l'hôte :
+
+- en local : `http://localhost:3001` ;
+- hors local : une URL de Back-End configurée dans le fichier.
+
+**Point de vigilance :** vérifier la présence du protocole `https://` dans l'URL distante et le bon chargement de `config.js` avant tout script qui utilise `window.API_URL`.
 
 ---
 
 ## 8. Lancement du Projet
 
-\### 8.1 Lancement simple du Back-End
+### 8.1 Back-End Seul
 
-Le serveur Express peut être lancé depuis le dossier `backend/` :
+```bash
+cd backend
+npm start
+```
 
-    cd backend
-    npm start
+Le serveur utilise par défaut le port **3001**.
 
-Le serveur sera accessible à l'adresse :
+### 8.2 Front-End et Back-End Ensemble
 
-    http://localhost:3001
+Depuis la racine :
 
-\### 8.2 Lancement global en développement
+```bash
+npm run dev
+```
 
-Depuis la racine du projet :
+Le script racine lance simultanément :
 
-    npm run dev
+- le Back-End avec `node --watch server.js` ;
+- BrowserSync en serveur statique sur `frontend/public/`, port **3000** (interface BrowserSync sur **3002**).
 
-Le script racine démarre simultanément le serveur Back-End et
-BrowserSync pour le Front-End.
+```text
+npm run dev
+    ├── Backend   ──> http://localhost:3001
+    └── Frontend  ──> http://localhost:3000
+```
+
+**Attention :** BrowserSync utilise ici `--server frontend/public` et **non** un proxy Express. Le Front-End appelle séparément l'API grâce à `window.API_URL`.
 
 ---
 
 ## 9. Live Reload
 
-\### 9.1 Installation des dépendances de développement
+### 9.1 Fonctionnement
 
-Depuis la racine :
+BrowserSync surveille les fichiers de `frontend/public/**/*`. Les changements HTML, CSS, JS et ressources statiques déclenchent un rafraîchissement côté navigateur.
 
-    npm install --save-dev concurrently browser-sync
+Le serveur Back-End est lancé en mode `node --watch`, qui redémarre le processus lorsque les fichiers surveillés changent.
 
-\### 9.2 Lancement en mode développement
+### 9.2 Commande de Développement
 
-Depuis la racine du projet :
+```bash
+npm run dev
+```
 
-    npm run dev
-
-Architecture d'exécution :
-
-    npm run dev
-         │
-         ├── Backend
-         │     └── Node.js / Express ──> http://localhost:3001
-         │
-         └── Frontend
-               └── BrowserSync ─────────> http://localhost:3000
-
-> **Note :** BrowserSync utilise Express comme serveur proxy. L'adresse
-> à ouvrir dans le navigateur sera généralement `http://localhost:3000`.
-
-\### 9.3 Fichiers surveillés
-
-Fichiers Front-End surveillés par BrowserSync :
-
-    frontend/public/index.html
-    frontend/public/assets/main.js
-    frontend/public/assets/style.css
-    frontend/public/assets/img/*
-
-Fichiers Back-End surveillés par `node --watch` :
-
-    backend/server.js
-
-\### 9.4 Où exécuter les commandes ?
-
-Pour le développement complet :
-
-    cd guess-the-date
-    npm run dev
-
-Il n'est pas nécessaire de lancer `npm run dev` depuis `backend/`
-lorsque le script d'orchestration racine est utilisé.
+La commande doit être lancée **depuis la racine du dépôt**.
 
 ---
 
 ## 10. Serveur Express
 
-Le serveur Express se trouve désormais dans `backend/server.js`.
+Le point d'entrée est `backend/server.js`.
 
-Configuration minimale initiale :
+Fonctionnalités présentes :
 
-    const express = require("express");
+- `express.json()` pour les requêtes JSON ;
+- `cookie-parser` pour les cookies ;
+- `morgan` pour les journaux HTTP ;
+- CORS avec `credentials: true` et liste d'origines autorisées ;
+- montage des routes d'authentification sur `/api/auth` ;
+- endpoint de contrôle de santé `GET /api/health`.
 
-    const app = express();
-    const PORT = process.env.PORT || 3001;
-
-    app.use(express.json());
-
-    app.listen(PORT, () => {
-      console.log(`Guess The Date API running on http://localhost:${PORT}`);
-    });
-
-Le Front-End est désormais séparé du serveur Express et sera servi
-indépendamment en production.
-
-Le Back-End expose principalement les futures routes de l'API et les
-fonctionnalités temps réel.
+Un serveur HTTP Node est créé explicitement. Socket.IO est installé dans les dépendances, mais **le serveur actuel n'initialise pas encore une instance Socket.IO ni ses événements de jeu**.
 
 ---
 
-## 11. API Backend
+## 11. API Back-End
 
-L'API est développée dans le dossier `backend/`.
+### 11.1 Endpoints Actuellement Déclarés
 
-\### Organisation actuelle/future :
+| Méthode | Endpoint | Rôle |
+|---|---|---|
+| `GET` | `/api/health` | Vérifier que l'API répond (`{ "status": "ok" }`) |
+| `POST` | `/api/auth/register` | Inscrire un utilisateur |
+| `POST` | `/api/auth/verify-email` | Valider un code OTP |
+| `POST` | `/api/auth/resend-code` | Renvoyer un code de vérification |
+| `POST` | `/api/auth/login` | Ouvrir une session |
+| `POST` | `/api/auth/logout` | Fermer une session |
+| `GET` | `/api/auth/me` | Consulter la session authentifiée |
 
-    backend/
-    ├── server.js
-    ├── package.json
-    └── src/
-        ├── routes/
-        │   └── game.routes.js
-        ├── controllers/
-        │   └── game.controller.js
-        ├── services/
-        │   └── game.service.js
-        └── data/
-            └── objects.js
+La route `/api/auth/me` utilise le middleware de vérification du JWT.
 
-\### Endpoints envisagés :
+### 11.2 Endpoints de Jeu Envisagés
 
--   `GET /api/game`
--   `GET /api/game/object`
--   `POST /api/game/guess`
--   `GET /api/game/hint`
--   `POST /api/scores`
--   `GET /api/scores`
+Ces routes sont **prévues**, mais **ne figurent pas dans le routeur du serveur examiné** :
 
-\### Temps réel
+- `GET /api/game`
+- `GET /api/game/object`
+- `POST /api/game/guess`
+- `GET /api/game/hint`
+- `POST /api/scores`
+- `GET /api/scores`
 
-Le mode multijoueur pourra utiliser **Socket.IO** pour gérer les
-communications temps réel entre les deux joueurs et le serveur.
+Le contrat définitif de l'API de jeu devra être validé lors de l'intégration de la banque d'objets et de la persistance des parties.
 
-Exemples de fonctionnalités concernées :
+### 11.3 Temps Réel — Évolution Future
 
--   création d'une partie ;
--   association de deux joueurs à une même partie ;
--   synchronisation du chronomètre ;
--   transmission des réponses ;
--   mise à jour des scores ;
--   fin de partie ;
--   synchronisation de l'objet actuellement affiché.
-
-La communication classique avec l'API REST restera adaptée aux
-opérations qui ne nécessitent pas de temps réel.
+Socket.IO pourra assurer la création des matchs, l'association des joueurs, la synchronisation des objets, des propositions, du chronomètre, des scores et de la fin de partie. Ces fonctionnalités ne doivent pas être considérées comme livrées à ce stade.
 
 ---
 
 ## 12. Gestion des Données
 
-### 12.1 Structure commune des objets
+### 12.1 Contrat Commun des Objets
 
-Pour la V0, chaque objet prévoit les données suivantes :
+Le modèle cible d'un objet comprend :
 
--   **Identifiant unique** : référence stable de l'objet, indépendante
-    de son nom.
--   **Nom** : normé en anglais pour la V0. Les traductions seront
-    ajoutées ultérieurement en restant rattachées au même identifiant.
--   **Année de référence** : réponse attendue pour la manche.
--   **Image** : visuel utilisé dans le jeu.
--   **Période historique** : `Prehistory`, `Antiquity`, `Middle Ages`,
-    `Modern Era` ou `Contemporary Era`. Cette donnée servira notamment à
-    la progression des badges historiques.
--   **Rareté** : trois niveaux `Common`, `Uncommon`, `Rare`.
-    -   **Common** : objet connu/familier et raisonnablement
-        identifiable/dat-able.
-    -   **Uncommon** : objet moins fréquent, moins connu ou plus
-        spécialisé, mais dont l'époque reste raisonnablement
-        identifiable.
-    -   **Rare** : objet réellement rare, très spécialisé ou peu connu,
-        associé également à une difficulté de reconnaissance/datation
-        supérieure.
-    -   La rareté prend donc en compte à la fois la **rareté/notoriété
-        réelle de l'objet** et sa **difficulté dans le jeu**.
--   **Source documentaire** : lien permettant d'en apprendre davantage
-    et de documenter la référence historique retenue.
--   **Thématique(s)** : avec possibilité de choix multiple si l'objet
-    est transversal entre différentes thématiques.
+- **Identifiant unique** stable, indépendant du nom ;
+- **Nom** normé en anglais pour la V0 ;
+- **Année de référence** ;
+- **Image** ou URL d'image ;
+- **Période historique** ;
+- **Rareté** (`Common`, `Uncommon`, `Rare`) ;
+- **Source documentaire** ;
+- **Thématique(s)**, éventuellement multiples.
 
-**Thématiques retenues pour le moment :**\
-`Everyday Life`, `Science`, `Technology`, `Transport`, `Art & Culture`,
-`Medicine`, `Military`, `Sport & Leisure`, `Industry & Engineering`.
+La rareté combine la notoriété réelle de l'objet et sa difficulté de reconnaissance/datation. Elle est indépendante de sa thématique.
 
-> ⚠️ On n'utilise pas de catégorie `General` : les objets
-> usuels/familiers relèvent plutôt de **Everyday Life**, ce qui évite de
-> confondre une thématique avec un mode de jeu « généraliste ».
+**Thématiques retenues :** `Everyday Life`, `Science`, `Technology`, `Transport`, `Art & Culture`, `Medicine`, `Military`, `Sport & Leisure`, `Industry & Engineering`.
 
-Les catégories et la rareté restent indépendantes : un objet
-`Everyday Life` peut par exemple être `Common`, `Uncommon` ou `Rare`.
+La catégorie `General` n'est pas retenue : les objets familiers relèvent notamment de `Everyday Life`.
 
-**Non retenu dans le contrat V0 :**
+**Non retenus dans le contrat V0 :** une description pédagogique obligatoire et des indices propres à chaque objet. Les indices restent calculés par la gameloop.
 
--   description pédagogique : le lien documentaire suffit pour le moment
-    ;
--   indices propres à l'objet : les indices actuels sont générés
-    automatiquement par la gameloop. Ce champ pourra être ajouté plus
-    tard si des indices éditoriaux sont introduits.
+### 12.2 Convention — Périodes Historiques
 
-La source locale temporaire sera mise au même format pour tous les
-objets. La gameloop utilisera ensuite uniquement l'objet courant pour
-récupérer son nom, son image et sa date de référence, sans valeur
-spécifique codée dans le HTML ou dans les règles du jeu.
+| Période | Années de référence |
+|---|---|
+| **Prehistory** | Avant -3000 |
+| **Antiquity** | -3000 à 476 |
+| **Middle Ages** | 477 à 1492 |
+| **Modern Era** | 1493 à 1789 |
+| **Contemporary Era** | 1790 à aujourd'hui |
 
-L'objectif est qu'à terme la source locale puisse être remplacée par
-l'API/BDD **sans réécrire la gameloop**. Les champs période, rareté et
-thématiques prépareront également la progression/badges et les futurs
-modes de jeu.
+Ces bornes sont une **convention de gameplay**, non une périodisation historique universelle. La période peut être calculée à partir de l'année de référence pour éviter les incohérences.
 
-Pour le futur **1v1**, le contrat de l'objet restera séparé de l'état
-d'une partie : tentatives, score, chrono, joueurs, etc. n'appartiennent
-pas aux données de l'objet. L'identifiant permettra aux deux joueurs de
-jouer sur la même référence. À terme, la réponse correcte pourra être
-vérifiée côté serveur afin de ne pas exposer directement l'année au
-client pendant une partie compétitive.
+### 12.3 Source Locale Actuelle
 
-### 12.2 Convention --- périodes historiques
+`frontend/public/assets/game-objects.js` contient actuellement deux objets de démonstration :
 
-Les périodes sont déterminées automatiquement à partir de l'année de
-référence afin d'éviter les incohérences de saisie :
+- `gramophone` — année `1887` ;
+- `uranium` — année `1789`.
 
--   **Prehistory** : avant -3000
--   **Antiquity** : -3000 à 476
--   **Middle Ages** : 477 à 1492
--   **Modern Era** : 1493 à 1789
--   **Contemporary Era** : 1790 à aujourd'hui
+Les enregistrements utilisent notamment `id`, `name`, `year`, `image`, `rarity`, `themes` et `sourceUrl`. Ils ne renseignent pas encore tous les champs du contrat cible (par exemple la période historique). Les valeurs de rareté et de thématique sont représentées par des identifiants minuscules, et non par les libellés éditoriaux présentés plus haut.
 
-Ces bornes constituent une **convention de gameplay** commune au projet.
+**Travail en cours :** consolider le schéma, normaliser les données, intégrer un ensemble plus important d'objets et remplacer progressivement la source locale par l'API/BDD sans réécrire la gameloop.
 
-L'année de référence reste la source de vérité : la période historique
-peut être calculée automatiquement plutôt que renseignée manuellement.
+### 12.4 Séparation Objet / État de Partie
 
-### 12.3 Séparation objet / état de partie
+Les tentatives, scores, indices révélés, chronomètres et états de victoire appartiennent à **l'état de partie**, et non aux données permanentes de l'objet. Cette séparation prépare les parties 1v1 et une validation serveur de la bonne réponse.
 
-Les données propres à une partie ne font pas partie du contrat de
-l'objet : tentatives, score, chrono, joueur, état de victoire ou données
-de match sont gérés séparément.
+### 12.5 Sources et Droits d'Utilisation
 
-Cette séparation prépare le futur 1v1 : les deux joueurs peuvent être
-associés au même identifiant d'objet tandis que leurs états de partie
-restent distincts. À terme, en mode compétitif, l'année correcte pourra
-être vérifiée côté serveur plutôt qu'exposée directement au navigateur.
-
-### 12.4 API externes
-
-Deux sources principales sont envisagées : 1. **Cooper Hewitt API :**
-Données liées aux collections du musée. 2. **Wikidata :** Base de
-connaissances collaborative (informations historiques et temporelles).
-
-*Les données récupérées devront être normalisées avant d'être transmises
-au moteur du jeu.*
+Wikidata et Cooper Hewitt sont des sources envisagées. Les dates, images, crédits, licences et références documentaires doivent être contrôlés avant intégration. La vérification des droits d'auteur et des exigences RGPD fait partie des travaux identifiés pour la banque d'objets.
 
 ---
 
 ## 13. Front-End
 
-Le Front-End est développé sans framework en **HTML5**, **CSS3** et
-**JavaScript ES6+**.
+### 13.1 Architecture Multipage
 
-Les fichiers sont situés dans :
+| Page | Fichier | État / rôle |
+|---|---|---|
+| Accueil | `index.html` | Présentation et accès au jeu |
+| Jeu | `game.html` | Interface de la gameloop solo |
+| Connexion | `login.html` | Connexion, inscription et vérification e-mail |
+| Compte | `account.html` | Interface de profil et statistiques, données actuellement de démonstration |
+| Badges | `badges.html` | Interface de progression, valeurs actuellement statiques |
+| Paramètres | `settings.html` | Interface à raccorder aux préférences persistées |
+| À propos | `about.html` | Présentation du jeu et carrousel interactif |
 
-    frontend/public/
-    ├── index.html
-    └── assets/
-        ├── main.js
-        ├── style.css
-        └── img/
+La navigation s'appuie sur des liens HTML classiques. Le contrôle d'accès aux actions/pages concernées utilise les scripts d'authentification.
 
--   **Fichier HTML principal :** `frontend/public/index.html`
--   **Fichier JS principal :** `frontend/public/assets/main.js`
--   **Feuille de style :** `frontend/public/assets/style.css`
+### 13.2 Identité Visuelle et Intégration
 
-Exemple de communication avec le Back-End via `fetch()` :
+L'interface adopte une direction artistique autour de l'enquête historique : fonds de bureau et tableau d'enquête, textures, typographies ornementales, palette brun/doré/bleu et logos dédiés.
 
-    const response = await fetch("http://localhost:3001/api/game/object");
-    const object = await response.json();
+Les ressources se trouvent dans `frontend/public/ressources-design/`. La feuille de style commune est `frontend/public/assets/style.css`.
 
-En production, l'URL de l'API sera configurée selon le domaine du
-Back-End déployé.
+### 13.3 Page About — Intégration Récente
+
+La page About intègre désormais :
+
+- le **carrousel de présentation** développé à partir du travail de Lorenzo ;
+- trois sections avec flèches de navigation et indicateurs de position ;
+- un **menu burger** inspiré de la navigation de la page Login ;
+- un fond « tableau d'enquête » et des ajustements de lisibilité, de positionnement et de responsive ;
+- une consolidation des règles CSS associées.
+
+Ces changements ont été intégrés à `preprod`.
+
+### 13.4 Page Login et Authentification Front-End
+
+`login.html`, `assets/login.js`, `assets/auth.js` et `assets/components.js` couvrent l'interface de connexion/inscription, la vérification e-mail, les interactions du menu et la gestion d'une fenêtre d'authentification réutilisable. Les requêtes nécessitant le cookie de session utilisent `credentials: 'include'`.
+
+**À vérifier en QA :** cohérence des parcours de connexion entre page dédiée et modale, messages d'erreur, expiration du code et navigation après authentification.
+
+### 13.5 Responsive et Accessibilité
+
+Le responsive est en cours d'harmonisation entre les pages. Les points de contrôle comprennent les petits écrans, la navigation au clavier, les libellés accessibles, les contrastes, les états de focus, les alternatives textuelles et l'absence de débordements.
 
 ---
 
 ## 14. Gestion des Années
 
-Le jeu doit prendre en charge : \* Les années positives : ex. `2026` \*
-Les années négatives (dates avant J.-C.) : ex. `-350` \* Les valeurs
-entières (`1877`, `1492`, `-44`, etc.)
+Le jeu prend en charge les années entières positives et négatives, par exemple `1887`, `1492` ou `-44`.
+
+La convention d'affichage et de calcul doit rester cohérente entre les données, les siècles, les indices et la frise. Les années avant notre ère demandent une vérification spécifique lors de la recette.
 
 ---
 
 ## 15. Calcul de la Proximité
 
-L'écart entre la réponse du joueur et l'année de référence est calculé
-avec la valeur absolue de la différence.
+La proximité utilise la valeur absolue de la différence entre l'année proposée et l'année de référence. Les six niveaux et leurs bornes sont définis en **section 3.2** ; cette section fait foi pour le game design V0.
 
-Plages d'évaluation de la gameloop V0 :
-
--   `0` an → **Correct 🥳**
--   `1` à `24` ans → **Burning 🔥**
--   `25` à `49` ans → **Hot 🥵**
--   `50` à `79` ans → **Warm 😎**
--   `80` à `99` ans → **Cold 🥶**
--   `100+` ans → **Freezing 🧊**
-
-Lorsque la réponse est incorrecte, le jeu indique également au joueur
-s'il doit essayer une date plus ancienne ou plus récente.
+Le retour directionnel indique si la réponse attendue est plus ancienne ou plus récente. Les retours doivent être recalculés pour chaque proposition et réinitialisés au changement d'objet.
 
 ---
 
-## 16. Développement
+## 16. Développement et Répartition des Travaux
 
-Pendant le développement, les fichiers principalement édités sont :
+### 16.1 Chantiers Fonctionnels
 
-    frontend/public/index.html
-    frontend/public/assets/main.js
-    frontend/public/assets/style.css
-    backend/server.js
+- **Sarah — Front-End fonctionnel :** gameloop solo, frise chronologique, navigation et intégration des objets dynamiques côté jeu.
+- **Lorenzo — Intégration graphique :** maquettes, styles, responsive et carrousel About ; travail coordonné avec la logique JavaScript de Sarah.
+- **Tristan — Back-End et infrastructure :** authentification, base de données, migrations, hébergement et intégration des services.
+- **Leon — Données :** constitution et normalisation de la banque d'objets/images, alimentation des données, licences et crédits.
 
-Les modifications sont détectées automatiquement grâce à :
+Cette répartition correspond aux travaux et responsabilités documentés ; elle ne constitue pas une confirmation que tous les tickets associés sont terminés.
 
-    npm run dev
+### 16.2 Priorité de Livraison
 
-Le développement est orchestré depuis la **racine du projet**.
+1. Finaliser et tester la gameloop solo.
+2. Stabiliser le contrat des objets et intégrer la banque de données.
+3. Valider la frise et les indices sur plusieurs objets.
+4. Harmoniser navigation, styles et responsive.
+5. Vérifier le parcours d'authentification et l'intégration Front/Back.
+6. Effectuer la recette fonctionnelle collective.
 
 ---
 
 ## 17. Gestion de Version (Git)
 
-\### 17.1 Fichiers à versionner
+### 17.1 Branches de Travail
 
--   `frontend/`
--   `backend/src/`
--   `backend/server.js`
--   `backend/package.json`
--   `backend/package-lock.json`
--   `package.json`
--   `package-lock.json`
--   `README.md`
--   `.gitignore`
--   `backend/.env.example`
+- **`preprod` :** branche d'intégration et de validation collective avant merge sur main.
+- **`lorenzo` :** branche de travail de Lorenzo.
+- **`leon` :** branche de travail de Leon
+- **`sarah` :** branche de développement de Sarah.
+- **`sarah-integration` :** branche utilisée par Sarah pour préparer les intégrations compliqués vers `preprod`.
+- **`tristan\...etc` :** branches de travails de tristan. Ce dernier préfère créer une branche pour chaque sujet développés.
 
-\### 17.2 Fichiers à ignorer (`.gitignore`)
+Les modifications destinées à `preprod` passent par une **Pull Request**, avec revue du diff et résolution des éventuels conflits avant fusion.
 
--   `node_modules/`
--   `.env`
--   `*.log`
--   Fichiers temporaires
--   Bases de données locales
+
+### 17.2 Bonnes Pratiques
+
+```bash
+git status
+git fetch origin
+git switch sarah
+git merge origin/preprod
+```
+
+Pour publier des changements validés :
+
+```bash
+git add <fichiers-concernes>
+git commit -m "type(scope): description"
+git push origin sarah
+```
+
+Éviter de versionner les scripts temporaires, les secrets, les fichiers `.env`, les dépendances installées et les fichiers générés non nécessaires. Vérifier systématiquement les fichiers indexés avant de committer.
 
 ---
 
 ## 18. Installation Rapide
 
-Pour un nouveau développeur :
+```bash
+git clone https://github.com/Triskolae/guess-the-date.git
+cd guess-the-date
+npm install
+cd backend
+npm install
+cd ..
+```
 
-    git clone <URL_DU_REPOSITORY>
-    cd guess-the-date
+Créer ensuite `backend/.env` avec les variables adaptées à son environnement (voir section 7), puis :
 
-    npm install
+```bash
+npm run dev
+```
 
-    cd backend
-    npm install
-    cd ..
-
-    cp backend/.env.example backend/.env
-
-    npm run dev
-
-Accès :
-
--   **Front-End avec BrowserSync :** `http://localhost:3000`
--   **Back-End Express :** `http://localhost:3001`
-
-Le serveur de développement doit être lancé depuis la **racine du
-projet**.
+- **Front-End :** <http://localhost:3000>
+- **Back-End :** <http://localhost:3001>
+- **Santé API :** <http://localhost:3001/api/health>
 
 ---
 
 ## 19. Évolutions Prévues
 
--   [ ] Mise en place complète de l'API Express.
--   [ ] Récupération automatique des objets depuis Wikidata et/ou Cooper
-    Hewitt.
--   [ ] Normalisation et validation des données.
--   [ ] Mise en place d'une base de données distante.
--   [ ] Persistance des scores.
--   [ ] Gestion de sessions et parties.
--   [ ] Génération aléatoire des objets.
--   [ ] Système de gestion avancée des indices.
--   [ ] Mise en place du multijoueur temps réel avec Socket.IO.
--   [ ] Synchronisation de deux joueurs dans une même partie.
--   [ ] Chronomètre et état de partie synchronisés côté serveur.
--   [ ] Authentification des joueurs.
--   [ ] Tests automatisés.
--   [ ] Déploiement du Front-End sur Vercel.
--   [ ] Déploiement du Back-End sur Render.
+Les cases cochées correspondent à une **présence technique vérifiée dans le dépôt** et non à une recette fonctionnelle complète.
+
+- [x] Architecture monorepo Front-End / Back-End.
+- [x] Serveur Express et endpoint de santé.
+- [x] Base PostgreSQL distante et configuration Knex multi-schémas.
+- [x] Migration initiale du schéma d'authentification.
+- [x] Routes d'inscription, connexion, vérification e-mail et session.
+- [x] Page About avec carrousel et navigation burger.
+- [x] Base de gameloop locale et frise JavaScript.
+- [ ] Recette complète de la gameloop solo sur une banque d'objets représentative.
+- [ ] Normalisation définitive et enrichissement de la banque d'objets.
+- [ ] API de jeu et récupération des objets depuis la base.
+- [ ] Intégration éventuelle de Wikidata et/ou Cooper Hewitt.
+- [ ] Persistance des scores et statistiques.
+- [ ] Progression des badges connectée aux données réelles.
+- [ ] Paramètres utilisateur persistés.
+- [ ] Gestion complète des parties et sessions de jeu.
+- [ ] Multijoueur temps réel avec Socket.IO.
+- [ ] Vérification de la réponse côté serveur pour le mode compétitif.
+- [ ] Tests automatisés et recette d'accessibilité.
+- [ ] Vérification systématique des licences, crédits et exigences RGPD.
+
+**Infrastructure :** le README précédent documente des déploiements Cloudflare Pages, Northflank et Supabase. Leur disponibilité opérationnelle actuelle doit être confirmée dans les consoles des services concernés ; la présence des fichiers de configuration ne suffit pas à l'établir.
 
 ---
 
 ## 20. État Actuel du Projet & Migration MVP
 
-Le projet est au stade de **MVP**. Le Front-End existant est désormais
-organisé dans `frontend/public/` et le serveur dans `backend/`.
+Le projet dispose d'un socle technique opérationnel dans le dépôt : pages HTML, styles, assets graphiques, gameloop locale, routes d'authentification et couche PostgreSQL/Knex.
 
-\### Structure actuelle :
+**Implémenté dans le code :**
 
-    guess-the-date/
-    ├── frontend/
-    │   └── public/
-    │       ├── index.html
-    │       └── assets/
-    │           ├── main.js
-    │           ├── style.css
-    │           └── img/
-    │               ├── gramophone.png
-    │               └── uranium.jpg
-    │
-    ├── backend/
-    │   ├── src/
-    │   ├── server.js
-    │   ├── package.json
-    │   └── package-lock.json
-    │
-    ├── package.json
-    ├── package-lock.json
-    ├── .env.example
-    ├── .gitignore
-    └── README.md
+- Interface multipage, carrousel About et menu burger associé.
+- Gameloop locale avec objets de démonstration et fonctions de frise/indices.
+- Routes API d'authentification, cookies de session et envoi d'e-mails.
+- Configuration des migrations et séparation des schémas de base de données.
 
-Le projet utilise un **monorepo GitHub**. Les deux parties peuvent être
-développées et versionnées ensemble tout en étant déployées séparément.
+**En cours de consolidation :**
 
-### Flux cible de l'application :
+- Passage de quelques objets locaux à une banque de données normalisée.
+- Recette de la gameloop et de la frise sur des cas variés.
+- Cohérence des parcours d'authentification, de navigation et du responsive.
+- Connexion des écrans de profil, statistiques et badges à des données réelles.
 
-``` text
-Browser ──> Frontend (HTML/CSS/JS) ──(HTTP/JSON)──> Express/Node.js ──> Data (API Ext. / BDD)
+**Non implémenté dans le serveur examiné :** API de jeu complète, gestion de match 1v1 et synchronisation temps réel des parties.
+
+```text
+Navigateur ──> Front-End HTML/CSS/JS ── HTTP/JSON ──> Express ──> PostgreSQL
+                           │
+                           └── Objets locaux (solution transitoire)
 ```
 
 ---
 
 ## 21. Aide-Mémoire : Commandes Utiles
 
-  --------------------------------------------------------------------------------------------
-  Action                              Commande
-  ----------------------------------- --------------------------------------------------------
-  **Installer les dépendances         `npm install`
-  racine**                            
+| Action | Commande |
+|---|---|
+| Installer les dépendances racine | `npm install` |
+| Installer les dépendances serveur | `cd backend && npm install` |
+| Démarrer l'ensemble en développement | `npm run dev` |
+| Démarrer uniquement l'API | `cd backend && npm start` |
+| Vérifier Node.js et npm | `node --version` / `npm --version` |
+| Vérifier Git | `git status` |
+| Récupérer les branches distantes | `git fetch origin` |
+| Contrôler les changements | `git diff --check` |
+| Voir les fichiers indexés | `git diff --cached --name-only` |
+| Créer une migration | `cd backend && npm run migrate:make -- <nom>` |
+| Migrer la préproduction | `cd backend && npm run migrate:preprod` |
+| Migrer la production | `cd backend && npm run migrate:prod` |
 
-  **Installer les dépendances         `cd backend && npm install`
-  Back-End**                          
-
-  **Ajouter les dev-dependencies**    `npm install --save-dev concurrently browser-sync`
-
-  **Démarrer le Back-End**            `cd backend && npm start`
-
-  **Démarrer le projet en dev**       `npm run dev`
-
-  **Vérifier Node / npm**             `node --version` / `npm --version`
-
-  **Statut Git**                      `git status`
-
-  **Commit & Push rapide**            `git add . && git commit -m "feat: setup" && git push`
-  --------------------------------------------------------------------------------------------
+---
 
 ## 22. Procédure de Déploiement
 
-### 8.1 Base de données (Supabase)
+### 22.1 Base de Données — Supabase
 
-Base PostgreSQL créée sur Supabase.
+L'architecture documentée utilise une instance PostgreSQL avec deux schémas :
 
-Chaîne de connexion injectée via la variable DATABASE_URL sur
-Northflank.
+- `preprod` pour les tests et la préproduction ;
+- `public` pour la production.
 
-### 8.2 Back-End (Northflank)
+Les paramètres de connexion sont fournis au serveur par variables d'environnement. Ne jamais committer les mots de passe ou chaînes de connexion.
 
-Déploiement via le Dockerfile situé dans /backend/Dockerfile.
+### 22.2 Back-End — Northflank
 
-Variables d'environnement configurées : PORT, DATABASE_URL,
-FRONTEND_URL.
+Le Dockerfile se trouve dans `backend/Dockerfile`. Le service doit disposer des variables de connexion à la base, de la configuration CORS et des secrets d'authentification/e-mail.
 
-Règle CORS activée pour accepter les requêtes originaires du domaine
-Cloudflare.
+La variable `NODE_ENV` influence notamment les options du cookie de session (`Secure`, `SameSite`). Les domaines Front-End et Back-End doivent être cohérents avec ces réglages.
 
-### 8.3 Front-End (Cloudflare Pages)
+### 22.3 Front-End — Cloudflare Pages
 
-Connecté au dépôt GitHub.
+Configuration documentée :
 
-Build output directory : frontend/public.
+- **Dossier publié :** `frontend/public` ;
+- **Commande de build :** aucune pour le Front-End statique.
 
-Build command : (Vide).
+L'URL de l'API utilisée par `assets/config.js` doit être vérifiée sur chaque environnement.
+
+### 22.4 Points de Vérification Avant Publication
+
+1. Confirmer les domaines et les variables d'environnement réellement déployés.
+2. Vérifier CORS, HTTPS, cookies et flux de connexion inter-domaines.
+3. Tester `GET /api/health` et le parcours d'authentification.
+4. Appliquer les migrations au bon schéma.
+5. Vérifier les pages, ressources, liens et erreurs console.
+
+---
+
+## 23. Gestion de la Base de Données & Migrations
+
+L'application utilise **Knex.js** pour versionner les changements de schéma sur **Supabase PostgreSQL**.
+
+### 23.1 Configurations
+
+Dans `backend/knexfile.js` :
+
+- `development` → schéma `preprod` ;
+- `staging` → schéma `preprod` ;
+- `production` → schéma `public`.
+
+### 23.2 Commandes (depuis `backend/`)
+
+| Action | Commande |
+|---|---|
+| Créer une migration | `npm run migrate:make -- <nom_migration>` |
+| Appliquer en préproduction | `npm run migrate:preprod` |
+| Appliquer en production | `npm run migrate:prod` |
+| Annuler la dernière migration préproduction | `npm run migrate:rollback:preprod` |
+
+**Attention :** les migrations de production doivent être exécutées uniquement après validation du schéma, de la sauvegarde et de l'environnement cible.
+
+### 23.3 État du Schéma
+
+Une migration d'authentification est présente dans `backend/src/database/migrations/`. Les futures tables d'objets, de parties, de propositions, de scores et de progression restent à définir selon les besoins du MVP.
+
+---
+
+## 24. Flux d'Authentification & E-mails
+
+### 24.1 Inscription
+
+Le joueur soumet son e-mail et son mot de passe à `POST /api/auth/register`. Le serveur hache le mot de passe avec `bcrypt` et prépare la vérification de l'adresse e-mail.
+
+### 24.2 Vérification OTP
+
+Un code de vérification à **6 chiffres** est généré et envoyé par e-mail via le service Resend. Le joueur le saisit dans l'interface ; le serveur vérifie le code via `POST /api/auth/verify-email`. Une route `POST /api/auth/resend-code` permet de demander un nouvel envoi.
+
+### 24.3 Connexion et Session
+
+La connexion utilise `POST /api/auth/login`. Après authentification, un JWT est placé dans un cookie `HttpOnly` ; le navigateur transmet ce cookie aux appels concernés grâce à `credentials: 'include'`.
+
+- `GET /api/auth/me` contrôle la session et retourne les informations autorisées.
+- `POST /api/auth/logout` ferme la session.
+- Le cookie est configuré avec `SameSite=Lax` en développement et `SameSite=None` avec `Secure` pour les environnements `staging` / `production`, selon `NODE_ENV`.
+
+### 24.4 Points de Sécurité et de Recette
+
+- Vérifier les durées de validité, la limitation des tentatives et les erreurs de vérification OTP.
+- Contrôler la confidentialité des messages et l'absence de secrets dans les logs.
+- Tester les cookies sur les domaines réellement utilisés.
+- Vérifier la protection des routes sensibles et les parcours de déconnexion.
+- Documenter la politique de conservation des données et les exigences RGPD avant publication.
+
+---
+
+## 25. Qualité, Tests et Recette V0
+
+### 25.1 Parcours Fonctionnel Prioritaire
+
+**Home → Play → Guess → Hot/Cold → Hints → Correct answer → Next object**
+
+Tester ce parcours sur plusieurs objets et plusieurs périodes historiques, y compris avec des années négatives.
+
+### 25.2 Cas à Couvrir
+
+- Réponse exacte au premier essai ;
+- Réponses successives plus anciennes et plus récentes ;
+- Seuils de proximité (`24/25`, `49/50`, `79/80`, `99/100`) ;
+- Déblocage des indices aux 3e et 5e erreurs ;
+- Réinitialisation de l'état lors de « Next object » ;
+- Frise : zoom, dézoom, graduations et proposition hors bornes ;
+- Image absente, objet incomplet et erreur de chargement ;
+- Inscription, vérification e-mail, connexion, déconnexion et expiration de session ;
+- Navigation clavier, mobile/tablette/desktop, contrastes et débordements ;
+- Absence d'erreurs JavaScript bloquantes.
+
+### 25.3 Critères de Validation
+
+La V0 doit être jouable de bout en bout, sans données d'objet codées en dur dans les règles de la gameloop, et sans bug critique sur les principaux navigateurs et tailles d'écran ciblés.
+
+---
+
+## 26. Perspectives V0.5 et Versions Ultérieures
+
+- **V0.5 :** enrichissement des comptes, statistiques et badges persistants ; finalisation des paramètres utilisateur ; progression par période et rareté.
+- **Évolutions de contenu :** banque d'objets étendue, validation éditoriale, intégration éventuelle d'API patrimoniales et meilleure gestion des crédits.
+- **Multijoueur :** matchmaking ou invitation 1v1, état de partie serveur, synchronisation Socket.IO, score et chronomètre.
+- **Qualité :** tests automatisés, observabilité, audit d'accessibilité et consolidation RGPD.
+
+Le périmètre de chaque version devra être confirmé collectivement avant d'être considéré comme engagé.
+
+---
+
+## 27. Historique Documentaire et Points à Confirmer
+
+### 27.1 Modifications Intégrées à Cette Proposition
+
+- Actualisation de l'arborescence réelle du dépôt.
+- Documentation de l'authentification, des cookies, de l'OTP et des migrations.
+- Mise à jour des commandes de lancement et de BrowserSync.
+- Intégration de la nouvelle page About, du carrousel et du menu burger.
+- Distinction entre endpoints présents et endpoints envisagés.
+- Clarification de la source locale des objets et du contrat de données cible.
+- Mise à jour du périmètre V0, des chantiers et de la recette.
+- Correction de la structure Markdown et suppression des instructions obsolètes.
+
+### 27.2 Questions à Valider avec l'Équipe
+
+- Le contrat définitif des objets, les conventions de valeurs (`rarity`, `themes`, période) et les modalités d'alimentation par Leon.
+- Les domaines exacts de préproduction/production et le fonctionnement effectif des déploiements.
+- Le comportement final des pages Account, Badges et Settings et leur priorité de livraison.
+- Le contrat de l'API de jeu et la répartition entre calcul client et validation serveur.
+- La stratégie de tests, de conformité des images et de protection des données.
+
+**Ce document décrit l'état du dépôt analysé et les décisions de cadrage disponibles ; il doit être révisé à mesure que les fonctionnalités sont intégrées et validées.**
