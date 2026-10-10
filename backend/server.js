@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 
 const http = require("http");
 const db = require("./src/database/db");
-const { Server } = require("socket.io");
+// const { Server } = require("socket.io");
 
 const authRoutes = require("./src/routes/auth.routes");
 const userRoutes = require("./src/routes/user.routes");

@@ -4,24 +4,16 @@ const db = require("../database/db");
 const { sendVerificationEmail } = require("../services/email.service");
 const { generateOTP, getOTPExpiration } = require("../utils/otp.util");
 
-// Configuration du cookie de session
-const getCookieOptions = () => ({
+const isProdOrStaging =
+  process.env.NODE_ENV === "production" || process.env.NODE_ENV === "staging";
+
+const getCookieOptions = (maxAge = 7 * 24 * 60 * 60 * 1000) => ({
   httpOnly: true,
-  secure:
-    process.env.NODE_ENV === "production" || process.env.NODE_ENV === "staging",
-  sameSite:
-    process.env.NODE_ENV === "production" || process.env.NODE_ENV === "staging"
-      ? "none"
-      : "lax",
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
+  secure: isProdOrStaging,
+  sameSite: isProdOrStaging ? "none" : "lax", // 'lax' autorise les cookies en HTTP local
+  maxAge,
 });
 
-/**
- * Compare un mot de passe en texte clair avec son hash stocké en base de données.
- * @param {string} password - Le mot de passe saisi par l'utilisateur.
- * @param {string} hash - Le mot de passe haché stocké en BDD.
- * @returns {Promise<boolean>} - `true` si le mot de passe correspond, sinon `false`.
- */
 async function verifyPassword(password, hash) {
   if (!password || !hash) {
     return false;
@@ -29,7 +21,6 @@ async function verifyPassword(password, hash) {
   return await bcrypt.compare(password, hash);
 }
 
-// 1. Inscription
 async function register(req, res) {
   try {
     const { email, password, username } = req.body;
@@ -38,18 +29,15 @@ async function register(req, res) {
       return res.status(400).json({ error: "E-mail et mot de passe requis." });
     }
 
-    // Vérifier si l'utilisateur existe déjà
     const existingUser = await db("users").where({ email }).first();
 
     if (existingUser) {
-      // Cas 1 : Utilisateur déjà vérifié -> Erreur
       if (existingUser.is_verified) {
         return res
           .status(409)
           .json({ error: "Un compte existe déjà avec cet e-mail." });
       }
 
-      // Cas 2 : Utilisateur existant MAIS non vérifié -> Régénération et renvoi de code
       const newCode = generateOTP();
       const newExpiration = getOTPExpiration(15);
 
@@ -68,10 +56,9 @@ async function register(req, res) {
       });
     }
 
-    // Cas 3 : Nouvel utilisateur
     const password_hash = await bcrypt.hash(password, 10);
     const verification_code = generateOTP();
-    const verification_expires_at = getOTPExpiration(15); // Expire dans 15 min
+    const verification_expires_at = getOTPExpiration(15);
 
     await db("users").insert({
       email,
@@ -82,7 +69,6 @@ async function register(req, res) {
       verification_expires_at,
     });
 
-    // Envoi de l'e-mail avec le code
     await sendVerificationEmail(email, verification_code);
 
     res.status(201).json({
@@ -97,7 +83,6 @@ async function register(req, res) {
   }
 }
 
-// 2. Renvoi de code de vérification
 async function resendCode(req, res) {
   try {
     const { email } = req.body;
@@ -133,7 +118,6 @@ async function resendCode(req, res) {
   }
 }
 
-// 3. Vérification de l'e-mail
 async function verifyEmail(req, res) {
   try {
     const { email, code } = req.body;
@@ -161,14 +145,12 @@ async function verifyEmail(req, res) {
         .json({ error: "Code de vérification invalide ou expiré." });
     }
 
-    // Marquer l'utilisateur comme vérifié et nettoyer le code
     await db("users").where({ id: user.id }).update({
       is_verified: true,
       verification_code: null,
       verification_expires_at: null,
     });
 
-    // Générer et déposer le JWT dans un cookie HTTP-Only
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_SECRET,
@@ -186,18 +168,15 @@ async function verifyEmail(req, res) {
   }
 }
 
-// 4. Connexion
 async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    // 1. Recherche de l'utilisateur
     const user = await db("users").where({ email }).first();
     if (!user || !(await verifyPassword(password, user.password_hash))) {
       return res.status(401).json({ message: "Identifiants invalides." });
     }
 
-    // 2. Vérification du statut d'activation du compte
     if (!user.is_verified) {
       return res.status(403).json({
         message: "Compte non vérifié.",
@@ -206,27 +185,18 @@ async function login(req, res) {
       });
     }
 
-    // 3. Vérification de l'onboarding via la table user_eras
     const hasPreferences = await db("user_eras")
       .where({ user_id: user.id })
       .first();
 
-    // 4. Génération du token JWT
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_SECRET || "votre_secret_jwt",
       { expiresIn: "24h" },
     );
 
-    // 5. Envoi du cookie HTTP-only
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+    res.cookie("token", token, getCookieOptions(24 * 60 * 60 * 1000));
 
-    // 6. Réponse JSON
     return res.json({
       message: "Connexion réussie",
       hasCompletedOnboarding: !!hasPreferences,
@@ -244,7 +214,6 @@ async function login(req, res) {
   }
 }
 
-// 5. Profil connecté (/me)
 async function getMe(req, res) {
   try {
     const user = await db("users")
@@ -262,9 +231,9 @@ async function getMe(req, res) {
   }
 }
 
-// 6. Déconnexion
-function logout(req, res) {
-  res.clearCookie("token", getCookieOptions());
+function logout(_, res) {
+  const { maxAge, ...clearOptions } = getCookieOptions();
+  res.clearCookie("token", clearOptions);
   res.json({ message: "Déconnexion réussie." });
 }
 
