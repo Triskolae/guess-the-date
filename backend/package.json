@@ -5,7 +5,7 @@
   "description": "* **Culture générale et histoire des sciences/techniques** : Permettre aux joueurs de découvrir ou de réviser l'histoire des objets du quotidien, des inventions majeures et des œuvres d'art à travers les époques.\r * **Repères chronologiques** : Aider à développer une meilleure perception des époques historiques et des étapes de l'évolution technologique et culturelle.",
   "main": "server.js",
   "scripts": {
-    "start": "npm run migrate:prod && node server.js",
+    "start": "node server.js",
     "dev": "node --watch server.js",
     "migrate:make": "knex migrate:make --knexfile knexfile.js",
     "migrate:preprod": "knex migrate:latest --env staging --knexfile knexfile.js",
