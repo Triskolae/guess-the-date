@@ -11,9 +11,9 @@ fetch(`${window.API_URL}/api/health`)
 
 // Connexion WebSockets (Socket.IO)
 // Only initialise Socket.IO when the client library is available.
-if (typeof io !== "undefined") {
-  const socket = io(window.API_URL);
-}
+// if (typeof io !== "undefined") {
+//   const socket = io(window.API_URL);
+// }
 
 const form = document.getElementById("answer-form");
 const feedback = document.getElementById("feedback");
