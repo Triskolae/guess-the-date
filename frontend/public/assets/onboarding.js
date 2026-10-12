@@ -1,6 +1,29 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const baseUrl = window.API_URL || "";
 
+  try {
+    const prefRes = await fetch(`${baseUrl}/api/user/preferences`, {
+      credentials: "include",
+      method: "GET",
+    });
+
+    if (prefRes.status === 401) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    if (prefRes.ok) {
+      const prefData = await prefRes.json();
+
+      if (prefData.hasCompletedOnboarding) {
+        window.location.href = "settings.html";
+        return;
+      }
+    }
+  } catch (err) {
+    console.error("Erreur vérification préférences :", err);
+  }
+
   const step1 = document.getElementById("step-1");
   const step2 = document.getElementById("step-2");
   const step3 = document.getElementById("step-3");
@@ -61,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <span class="card-subtitle">${formatEraYears(era.start_year, era.end_year)}</span>
           </div>
         </label>
-      `
+      `,
       )
       .join("");
   }
@@ -86,14 +109,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             <span class="card-title">${cat.name}</span>
           </div>
         </label>
-      `
+      `,
       )
       .join("");
 
     const checkboxes = container.querySelectorAll(".category-checkbox");
     checkboxes.forEach((cb) => {
       cb.addEventListener("change", () => {
-        const checkedCount = container.querySelectorAll(".category-checkbox:checked").length;
+        const checkedCount = container.querySelectorAll(
+          ".category-checkbox:checked",
+        ).length;
         if (checkedCount >= 3) {
           checkboxes.forEach((box) => {
             if (!box.checked) box.disabled = true;
@@ -109,13 +134,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     onboardingForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const gameMode = document.querySelector('input[name="game_mode"]:checked')?.value;
+      const gameMode = document.querySelector(
+        'input[name="game_mode"]:checked',
+      )?.value;
       const selectedEraId = parseInt(
         document.querySelector('input[name="era_id"]:checked')?.value,
-        10
+        10,
       );
       const selectedCategoryIds = Array.from(
-        document.querySelectorAll('input[name="category_ids"]:checked')
+        document.querySelectorAll('input[name="category_ids"]:checked'),
       ).map((cb) => parseInt(cb.value, 10));
 
       if (!selectedEraId) {

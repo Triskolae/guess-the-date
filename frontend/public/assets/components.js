@@ -1,6 +1,40 @@
-// Composant Nav
 class AppHeader extends HTMLElement {
   connectedCallback() {
+    this.render();
+    this.checkAuth();
+  }
+
+  async checkAuth() {
+    try {
+      const user = await fetch(`${window.API_URL}/api/auth/me`, {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (user) {
+        this.updateAuthLink({
+          href: "settings.html",
+          label: "Settings",
+        });
+      }
+    } catch (error) {
+      console.log("Utilisateur non connecté", error);
+      this.updateAuthLink({
+        href: "login.html",
+        label: "Log in",
+      });
+    }
+  }
+
+  updateAuthLink({ href, label }) {
+    const authContainer = this.querySelector("#auth-nav-item");
+    if (authContainer) {
+      authContainer.innerHTML = `<a href="${href}">${label}</a>`;
+    }
+  }
+
+  render() {
     this.innerHTML = `
       <header class="site-header">
         <a href="index.html" class="site-logo" aria-label="Guess the Date — Home">
@@ -18,21 +52,22 @@ class AppHeader extends HTMLElement {
 
         <nav class="main-nav" aria-label="Main navigation">
           <ul>
-          <li>
-            <a href="game.html" class="play-game">Play</a>
-          </li>
-          <li>
-            <a href="about.html">About</a>
-          </li>
-          <li>
-            <a href="login.html">Log in</a>
-          </li>
+            <li>
+              <a href="game.html" class="play-game">Play</a>
+            </li>
+            <li>
+              <a href="about.html">About</a>
+            </li>
+            <li id="auth-nav-item">
+              <a href="login.html">Log in</a>
+            </li>
           </ul>
         </nav>
       </header>
     `;
   }
 }
+
 customElements.define("app-header", AppHeader);
 
 // Écoute de l'événement global pour ouvrir la modale d'authentification

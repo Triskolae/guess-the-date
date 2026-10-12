@@ -52,6 +52,33 @@ async function savePreferences(req, res) {
   }
 }
 
+async function getPreferences(req, res) {
+  try {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Non authentifié." });
+    }
+
+    const eras = await db("user_eras")
+      .where({ user_id: userId })
+      .count();
+
+    const categories = await db("user_categories")
+      .where({ user_id: userId })
+      .count();
+    const hasCompletedOnboarding = !!eras[0].count || !!categories[0].count;
+
+    return res.status(200).json({
+      hasCompletedOnboarding,
+    });
+  } catch (error) {
+    console.error("Erreur lors de la récupération des préférences :", error);
+    return res.status(500).json({ message: "Erreur serveur." });
+  }
+};
+
 module.exports = {
   savePreferences,
+  getPreferences,
 };
