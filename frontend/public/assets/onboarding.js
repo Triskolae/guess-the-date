@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const baseUrl = window.API_URL || "";
 
-  // Éléments du DOM
   const step1 = document.getElementById("step-1");
   const step2 = document.getElementById("step-2");
   const step3 = document.getElementById("step-3");
@@ -14,7 +13,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const onboardingForm = document.getElementById("onboarding-form");
 
-  // --- 1. Navigation entre les étapes ---
   function goToStep(showStep) {
     [step1, step2, step3, step4].forEach((s) => s?.classList.add("hidden"));
     showStep?.classList.remove("hidden");
@@ -34,7 +32,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   btnBackTo2?.addEventListener("click", () => goToStep(step2));
 
-  // --- 2. Chargement des données (Eras & Categories) ---
   try {
     const response = await fetch(`${baseUrl}/api/onboarding/options`, {
       credentials: "include",
@@ -50,7 +47,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Erreur onboarding :", error);
   }
 
-  // --- 3. Rendu des Époques (Boutons Radio) ---
   function renderEras(eras) {
     const container = document.getElementById("eras-container");
     if (!container) return;
@@ -77,7 +73,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return "";
   }
 
-  // --- 4. Rendu des Catégories (Checkboxes - Max 3) ---
   function renderCategories(categories) {
     const container = document.getElementById("categories-container");
     if (!container) return;
@@ -95,7 +90,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       )
       .join("");
 
-    // Limitation stricte à 3 sélections max
     const checkboxes = container.querySelectorAll(".category-checkbox");
     checkboxes.forEach((cb) => {
       cb.addEventListener("change", () => {
@@ -111,7 +105,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // --- 5. Soumission du Formulaire ---
   if (onboardingForm) {
     onboardingForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -148,7 +141,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         if (response.ok) {
-          // Affichage du message de confirmation (Étape 4)
           goToStep(step4);
         } else {
           const data = await response.json();
