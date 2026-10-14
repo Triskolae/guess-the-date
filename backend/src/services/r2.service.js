@@ -19,7 +19,6 @@ const s3Client = new S3Client({
  * @returns {Promise<string>} L'URL publique de l'image
  */
 async function uploadToR2(fileBuffer, fileName, mimeType) {
-  console.log("Bucket à utiliser :", process.env.R2_BUCKET_NAME);
   const upload = new Upload({
     client: s3Client,
     params: {

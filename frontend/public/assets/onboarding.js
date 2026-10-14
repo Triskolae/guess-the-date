@@ -1,7 +1,29 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const baseUrl = window.API_URL || "";
 
-  // Éléments du DOM
+  try {
+    const prefRes = await fetch(`${baseUrl}/api/user/preferences`, {
+      credentials: "include",
+      method: "GET",
+    });
+
+    if (prefRes.status === 401) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    if (prefRes.ok) {
+      const prefData = await prefRes.json();
+
+      if (prefData.hasCompletedOnboarding) {
+        window.location.href = "settings.html";
+        return;
+      }
+    }
+  } catch (err) {
+    console.error("Erreur vérification préférences :", err);
+  }
+
   const step1 = document.getElementById("step-1");
   const step2 = document.getElementById("step-2");
   const step3 = document.getElementById("step-3");
@@ -14,7 +36,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const onboardingForm = document.getElementById("onboarding-form");
 
-  // --- 1. Navigation entre les étapes ---
   function goToStep(showStep) {
     [step1, step2, step3, step4].forEach((s) => s?.classList.add("hidden"));
     showStep?.classList.remove("hidden");
@@ -34,7 +55,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   btnBackTo2?.addEventListener("click", () => goToStep(step2));
 
-  // --- 2. Chargement des données (Eras & Categories) ---
   try {
     const response = await fetch(`${baseUrl}/api/onboarding/options`, {
       credentials: "include",
@@ -50,7 +70,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Erreur onboarding :", error);
   }
 
-  // --- 3. Rendu des Époques (Boutons Radio) ---
   function renderEras(eras) {
     const container = document.getElementById("eras-container");
     if (!container) return;
@@ -65,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <span class="card-subtitle">${formatEraYears(era.start_year, era.end_year)}</span>
           </div>
         </label>
-      `
+      `,
       )
       .join("");
   }
@@ -77,7 +96,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return "";
   }
 
-  // --- 4. Rendu des Catégories (Checkboxes - Max 3) ---
   function renderCategories(categories) {
     const container = document.getElementById("categories-container");
     if (!container) return;
@@ -91,15 +109,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             <span class="card-title">${cat.name}</span>
           </div>
         </label>
-      `
+      `,
       )
       .join("");
 
-    // Limitation stricte à 3 sélections max
     const checkboxes = container.querySelectorAll(".category-checkbox");
     checkboxes.forEach((cb) => {
       cb.addEventListener("change", () => {
-        const checkedCount = container.querySelectorAll(".category-checkbox:checked").length;
+        const checkedCount = container.querySelectorAll(
+          ".category-checkbox:checked",
+        ).length;
         if (checkedCount >= 3) {
           checkboxes.forEach((box) => {
             if (!box.checked) box.disabled = true;
@@ -111,18 +130,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // --- 5. Soumission du Formulaire ---
   if (onboardingForm) {
     onboardingForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const gameMode = document.querySelector('input[name="game_mode"]:checked')?.value;
+      const gameMode = document.querySelector(
+        'input[name="game_mode"]:checked',
+      )?.value;
       const selectedEraId = parseInt(
         document.querySelector('input[name="era_id"]:checked')?.value,
-        10
+        10,
       );
       const selectedCategoryIds = Array.from(
-        document.querySelectorAll('input[name="category_ids"]:checked')
+        document.querySelectorAll('input[name="category_ids"]:checked'),
       ).map((cb) => parseInt(cb.value, 10));
 
       if (!selectedEraId) {
@@ -148,7 +168,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         if (response.ok) {
-          // Affichage du message de confirmation (Étape 4)
           goToStep(step4);
         } else {
           const data = await response.json();

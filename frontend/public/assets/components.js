@@ -1,6 +1,9 @@
-// Composant Nav
 class AppHeader extends HTMLElement {
   connectedCallback() {
+    this.render();
+  }
+
+  render() {
     this.innerHTML = `
       <header class="site-header">
         <a href="index.html" class="site-logo" aria-label="Guess the Date — Home">
@@ -100,7 +103,7 @@ class AuthModal extends HTMLElement {
       <div id="auth-modal" class="modal hidden">
         <div class="modal-content">
           <span class="close-btn">&times;</span>
-          
+
           <!-- Zone d'affichage des retours utilisateur -->
           <div id="auth-feedback" class="auth-feedback-msg hidden"></div>
 
