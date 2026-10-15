@@ -16,7 +16,7 @@ exports.up = async function (knex) {
     ON users
     FOR SELECT
     USING (
-      id = auth.uid() 
+      id = auth.uid()
       OR id::text = current_setting('app.current_user_id', true)
     );
   `);
@@ -26,7 +26,7 @@ exports.up = async function (knex) {
     ON users
     FOR UPDATE
     USING (
-      id = auth.uid() 
+      id = auth.uid()
       OR id::text = current_setting('app.current_user_id', true)
     );
   `);
@@ -36,11 +36,11 @@ exports.up = async function (knex) {
     ON user_eras
     FOR ALL
     USING (
-      user_id = auth.uid() 
+      user_id = auth.uid()
       OR user_id::text = current_setting('app.current_user_id', true)
     )
     WITH CHECK (
-      user_id = auth.uid() 
+      user_id = auth.uid()
       OR user_id::text = current_setting('app.current_user_id', true)
     );
   `);
@@ -50,11 +50,11 @@ exports.up = async function (knex) {
     ON user_categories
     FOR ALL
     USING (
-      user_id = auth.uid() 
+      user_id = auth.uid()
       OR user_id::text = current_setting('app.current_user_id', true)
     )
     WITH CHECK (
-      user_id = auth.uid() 
+      user_id = auth.uid()
       OR user_id::text = current_setting('app.current_user_id', true)
     );
   `);

@@ -542,6 +542,8 @@ function resetRound() {
 
   feedback.innerHTML = "";
   hints.innerText = "";
+  document.getElementById("hint-one-button").hidden = true;
+  document.getElementById("hint-two-button").hidden = true;
 
   timelineCursor.style.left = "0%";
 
@@ -550,8 +552,10 @@ function resetRound() {
   userAnswerInput.disabled = false;
 
   const submitButton =
-    form.querySelector('button[type="submit"]');
+    form.querySelector(".game-submit");
 
+  submitButton.type = "submit";
+  submitButton.textContent = "Submit";
   submitButton.disabled = false;
 
   nextObjectButton.hidden = true;
@@ -566,17 +570,28 @@ function resetRound() {
 }
 
 function displayHints(answer) {
-  const hintsList = [];
+  // Un indice n'est révélé qu'après ouverture volontaire de sa modale.
+  document.getElementById("hint-one-button").hidden = userTries < 3;
+  document.getElementById("hint-two-button").hidden = userTries < 5;
+  document.getElementById("hint-one-text").textContent = getCentury(answer);
+  document.getElementById("hint-two-text").textContent = getPartialYear(answer);
+}
 
-  if (userTries >= 3) {
-    hintsList.push(getCentury(answer));
-  }
+for (const [buttonId, modalId] of [
+  ["hint-one-button", "hint-one-modal"],
+  ["hint-two-button", "hint-two-modal"],
+  ["legend-info-button", "legend-modal"],
+]) {
+  document.getElementById(buttonId)?.addEventListener("click", () => {
+    document.getElementById(modalId)?.showModal();
+  });
+}
 
-  if (userTries >= 5) {
-    hintsList.push(getPartialYear(answer));
-  }
-
-  hints.innerText = hintsList.join("\n");
+for (const dialog of document.querySelectorAll(".game-hint-modal")) {
+  dialog.querySelector(".game-modal-close")?.addEventListener("click", () => dialog.close());
+  dialog.addEventListener("click", (event) => {
+    if (event.target === dialog) dialog.close();
+  });
 }
 
 function displayTemperatureFeedback(
@@ -634,12 +649,27 @@ function winRound(currentObject) {
   userAnswerInput.disabled = true;
 
   const submitButton =
-    form.querySelector('button[type="submit"]');
+    form.querySelector(".game-submit");
 
-  submitButton.disabled = true;
+  submitButton.type = "button";
+  submitButton.textContent = "Next object";
+  submitButton.disabled = false;
 
-  nextObjectButton.hidden = false;
+  nextObjectButton.hidden = true;
 }
+
+function advanceToNextObject() {
+  if (!gameObjects.length) return;
+  currentObjectIndex = (currentObjectIndex + 1) % gameObjects.length;
+  resetRound();
+}
+
+form.querySelector(".game-submit").addEventListener("click", (event) => {
+  if (roundFinished) {
+    event.preventDefault();
+    advanceToNextObject();
+  }
+});
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -685,14 +715,12 @@ form.addEventListener("submit", (event) => {
     userAnswer,
     currentObject.year
   );
+
+  userAnswerInput.value = "";
+  userAnswerInput.focus();
 });
 
-nextObjectButton.addEventListener("click", () => {
-  currentObjectIndex =
-    (currentObjectIndex + 1) % gameObjects.length;
-
-  resetRound();
-});
+nextObjectButton.addEventListener("click", advanceToNextObject);
 
 setGameObjects(LOCAL_GAME_OBJECTS);
 
