@@ -9,12 +9,10 @@
   <body class="onboarding">
     <main class="onboarding-wrapper">
       <article class="card">
-        <!-- Header interne à la carte : Compteur -->
         <header class="card-header">
           <span id="step-counter"></span>
         </header>
         <form id="onboarding-form">
-          <!-- Étape 1 : Mode / Optique de jeu -->
           <section id="step-1" class="onboarding-step">
             <h2>Choisissez votre mode de jeu</h2>
             <div class="options-grid">
@@ -48,12 +46,9 @@
             </div>
           </section>
 
-          <!-- Étape 2 : Époque (Bouton Radio) -->
           <section id="step-2" class="onboarding-step hidden">
             <h2>Choisissez votre époque principale</h2>
-            <div id="eras-container" class="options-grid">
-              <!-- Injecté dynamiquement en radio buttons -->
-            </div>
+            <div id="eras-container" class="options-grid"></div>
             <div class="step-actions">
               <button
                 type="button"
@@ -72,13 +67,10 @@
             </div>
           </section>
 
-          <!-- Étape 3 : Catégories (Checkboxes - Max 3) -->
           <section id="step-3" class="onboarding-step hidden">
             <h2>Choisissez vos thématiques (3 max)</h2>
-            <p class="step-hint">Sélectionnez entre 1 et 3 catégories.</p>
-            <div id="categories-container" class="options-grid">
-              <!-- Injecté dynamiquement en checkboxes -->
-            </div>
+            <p class="step-hint">Sélectionnez jusqu'à 3 catégories.</p>
+            <div id="categories-container" class="options-grid"></div>
             <div class="step-actions">
               <button
                 type="button"
@@ -93,7 +85,6 @@
             </div>
           </section>
 
-          <!-- Étape 4 : Message de confirmation -->
           <section id="step-4" class="onboarding-step hidden">
             <h2>Configuration terminée !</h2>
             <p>Vos préférences ont bien été enregistrées.</p>

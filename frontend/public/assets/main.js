@@ -28,23 +28,25 @@ const nextObjectButton = document.getElementById("next-object");
 const timelineCursor = document.getElementById("timeline-cursor");
 const timelineTicks = document.getElementById("timeline-ticks");
 
-const objectImageFallback = document.getElementById("object-image-fallback");
+const objectImageFallback = document.getElementById(
+  "object-image-fallback",
+);
 
-const DEFAULT_TIMELINE_MIN_YEAR = -3000;
+const MIN_TIMELINE_YEAR = -3000;
+const DEFAULT_TIMELINE_MIN_YEAR = MIN_TIMELINE_YEAR;
 const DEFAULT_TIMELINE_MAX_YEAR = new Date().getFullYear();
 
-// What the player has discovered about the possible answer.
 let searchMinYear = DEFAULT_TIMELINE_MIN_YEAR;
 let searchMaxYear = DEFAULT_TIMELINE_MAX_YEAR;
 
-// What is currently displayed on the timeline.
 let timelineMinYear = DEFAULT_TIMELINE_MIN_YEAR;
 let timelineMaxYear = DEFAULT_TIMELINE_MAX_YEAR;
 
-// Temporary data used to test the game loop.
-// This will later be replaced by data coming from the API/database.
-
 let gameObjects = [];
+let currentObjectIndex = 0;
+let userTries = 0;
+let roundFinished = false;
+let isLoadingObject = false;
 
 function useLocalGameObjects() {
   gameObjects = LOCAL_GAME_OBJECTS
@@ -53,12 +55,10 @@ function useLocalGameObjects() {
 
   currentObjectIndex = 0;
 
-  console.info("Using local development game objects.");
+  console.info(
+    "Using local development game objects.",
+  );
 }
-
-let currentObjectIndex = 0;
-let userTries = 0;
-let roundFinished = false;
 
 function getCurrentObject() {
   return gameObjects[currentObjectIndex];
@@ -75,45 +75,14 @@ function normalizeGameObject(object) {
     year: object.year ?? null,
     image: object.image ?? null,
     rarity: object.rarity ?? null,
-    themes: Array.isArray(object.themes) ? object.themes : [],
+    themes: Array.isArray(object.themes)
+      ? object.themes
+      : [],
     sourceUrl: object.sourceUrl ?? null,
   };
 }
 
-function setGameObjects(objects) {
-  if (!Array.isArray(objects) || objects.length === 0) {
-    console.warn(
-      "No game objects received. Falling back to local development data.",
-    );
-
-    useLocalGameObjects();
-    return false;
-  }
-
-  const normalizedObjects = objects
-    .map(normalizeGameObject)
-    .filter(Boolean);
-
-  if (normalizedObjects.length === 0) {
-    console.warn(
-      "No valid game objects received. Falling back to local development data.",
-    );
-
-    useLocalGameObjects();
-    return false;
-  }
-
-  gameObjects = normalizedObjects;
-  currentObjectIndex = 0;
-
-  return true;
-}
-
 function getHistoricalPeriod(year) {
-  if (year < -3000) {
-    return "Prehistory";
-  }
-
   if (year <= 476) {
     return "Antiquity";
   }
@@ -136,7 +105,10 @@ function validateGameObject(object) {
   }
 
   if (!object.id) {
-    console.error("Game object is missing an id.", object);
+    console.error(
+      "Game object is missing an id.",
+      object,
+    );
     return false;
   }
 
@@ -157,14 +129,19 @@ function getObjectDisplayData(object) {
     image: object.image || null,
     sourceUrl: object.sourceUrl || null,
     rarity: object.rarity || null,
-    themes: Array.isArray(object.themes) ? object.themes : [],
+    themes: Array.isArray(object.themes)
+      ? object.themes
+      : [],
   };
 }
 
 function getCentury(year) {
   const century = Math.ceil(year / 100);
 
-  if (century % 100 >= 11 && century % 100 <= 13) {
+  if (
+    century % 100 >= 11 &&
+    century % 100 <= 13
+  ) {
     return `${century}th century`;
   }
 
@@ -190,7 +167,8 @@ function getPartialYear(year) {
 }
 
 function getTimelinePosition(year) {
-  const range = timelineMaxYear - timelineMinYear;
+  const range =
+    timelineMaxYear - timelineMinYear;
 
   if (range <= 0) {
     return 50;
@@ -199,22 +177,36 @@ function getTimelinePosition(year) {
   const position =
     ((year - timelineMinYear) / range) * 100;
 
-  return Math.min(100, Math.max(0, position));
+  return Math.min(
+    100,
+    Math.max(0, position),
+  );
 }
 
 function updateTimelineCursor(year) {
-  const position = getTimelinePosition(year);
+  const position =
+    getTimelinePosition(year);
 
-  timelineCursor.style.left = `${position}%`;
+  timelineCursor.style.left =
+    `${position}%`;
 }
 
-function updateSearchBounds(userAnswer, answer) {
+function updateSearchBounds(
+  userAnswer,
+  answer,
+) {
   if (userAnswer < answer) {
-    searchMinYear = Math.max(searchMinYear, userAnswer);
+    searchMinYear = Math.max(
+      searchMinYear,
+      userAnswer,
+    );
   }
 
   if (userAnswer > answer) {
-    searchMaxYear = Math.min(searchMaxYear, userAnswer);
+    searchMaxYear = Math.min(
+      searchMaxYear,
+      userAnswer,
+    );
   }
 }
 
@@ -265,45 +257,54 @@ function getRoundingStep(zoomStep) {
 }
 
 function updateTimelineRange() {
-  const searchRange = searchMaxYear - searchMinYear;
-  const zoomStep = getZoomStep(searchRange);
+  const searchRange =
+    searchMaxYear - searchMinYear;
 
-  // Keep the full historical view while the possible
-  // answer range is still greater than 1000 years.
+  const zoomStep =
+    getZoomStep(searchRange);
+
   if (zoomStep === null) {
-    timelineMinYear = DEFAULT_TIMELINE_MIN_YEAR;
-    timelineMaxYear = DEFAULT_TIMELINE_MAX_YEAR;
+    timelineMinYear =
+      DEFAULT_TIMELINE_MIN_YEAR;
+
+    timelineMaxYear =
+      DEFAULT_TIMELINE_MAX_YEAR;
+
     return;
   }
 
-  const roundingStep = getRoundingStep(zoomStep);
+  const roundingStep =
+    getRoundingStep(zoomStep);
 
   let minYear =
-    Math.floor(searchMinYear / roundingStep) * roundingStep;
+    Math.floor(
+      searchMinYear / roundingStep,
+    ) * roundingStep;
 
   let maxYear =
-    Math.ceil(searchMaxYear / roundingStep) * roundingStep;
+    Math.ceil(
+      searchMaxYear / roundingStep,
+    ) * roundingStep;
 
-  // The displayed timeline must be at least as wide
-  // as the current zoom level.
   if (maxYear - minYear < zoomStep) {
     maxYear = minYear + zoomStep;
   }
 
-  // Ensure the known search area remains inside the timeline.
   if (maxYear < searchMaxYear) {
     maxYear =
-      Math.ceil(searchMaxYear / roundingStep) * roundingStep;
+      Math.ceil(
+        searchMaxYear / roundingStep,
+      ) * roundingStep;
 
     minYear = maxYear - zoomStep;
   }
 
-  timelineMinYear = minYear;
+  // Blocage à -3000 minimum
+  timelineMinYear = Math.max(MIN_TIMELINE_YEAR, minYear);
   timelineMaxYear = maxYear;
 }
 
 function ensureGuessIsVisible(userAnswer) {
-  // Nothing to do if the guess is already visible.
   if (
     userAnswer >= timelineMinYear &&
     userAnswer <= timelineMaxYear
@@ -315,10 +316,16 @@ function ensureGuessIsVisible(userAnswer) {
     timelineMaxYear - timelineMinYear;
 
   const expandedMin =
-    Math.min(userAnswer, timelineMinYear);
+    Math.min(
+      userAnswer,
+      timelineMinYear,
+    );
 
   const expandedMax =
-    Math.max(userAnswer, timelineMaxYear);
+    Math.max(
+      userAnswer,
+      timelineMaxYear,
+    );
 
   const requiredRange =
     expandedMax - expandedMin;
@@ -337,12 +344,15 @@ function ensureGuessIsVisible(userAnswer) {
     newRange = 2000;
   } else {
     newRange =
-      Math.ceil(requiredRange / 1000) * 1000;
+      Math.ceil(
+        requiredRange / 1000,
+      ) * 1000;
   }
 
-  // Never make the timeline smaller while trying
-  // to display an out-of-range guess.
-  newRange = Math.max(newRange, currentRange);
+  newRange = Math.max(
+    newRange,
+    currentRange,
+  );
 
   let roundingStep;
 
@@ -357,22 +367,25 @@ function ensureGuessIsVisible(userAnswer) {
   }
 
   let minYear =
-    Math.floor(expandedMin / roundingStep) *
-    roundingStep;
+    Math.floor(
+      expandedMin / roundingStep,
+    ) * roundingStep;
 
-  let maxYear = minYear + newRange;
+  let maxYear =
+    minYear + newRange;
 
-  // If the right side is still not large enough,
-  // shift the whole displayed window.
   if (maxYear < expandedMax) {
     maxYear =
-      Math.ceil(expandedMax / roundingStep) *
-      roundingStep;
+      Math.ceil(
+        expandedMax / roundingStep,
+      ) * roundingStep;
 
-    minYear = maxYear - newRange;
+    minYear =
+      maxYear - newRange;
   }
 
-  timelineMinYear = minYear;
+  // Blocage à -3000 minimum
+  timelineMinYear = Math.max(MIN_TIMELINE_YEAR, minYear);
   timelineMaxYear = maxYear;
 }
 
@@ -382,8 +395,10 @@ function formatTimelineYear(year) {
   }
 
   if (
-    timelineMinYear === DEFAULT_TIMELINE_MIN_YEAR &&
-    timelineMaxYear === DEFAULT_TIMELINE_MAX_YEAR &&
+    timelineMinYear ===
+      DEFAULT_TIMELINE_MIN_YEAR &&
+    timelineMaxYear ===
+      DEFAULT_TIMELINE_MAX_YEAR &&
     year === DEFAULT_TIMELINE_MAX_YEAR
   ) {
     return "Present";
@@ -415,8 +430,9 @@ function updateTimelineTicks() {
   }
 
   const firstTick =
-    Math.ceil(timelineMinYear / tickStep) *
-    tickStep;
+    Math.ceil(
+      timelineMinYear / tickStep,
+    ) * tickStep;
 
   for (
     let year = firstTick;
@@ -425,25 +441,35 @@ function updateTimelineTicks() {
   ) {
     const position =
       ((year - timelineMinYear) /
-        (timelineMaxYear - timelineMinYear)) *
+        (
+          timelineMaxYear -
+          timelineMinYear
+        )) *
       100;
 
     const tick =
       document.createElement("div");
 
-    tick.className = "timeline-tick";
-    tick.style.left = `${position}%`;
+    tick.className =
+      "timeline-tick";
+
+    tick.style.left =
+      `${position}%`;
 
     const mark =
       document.createElement("div");
 
-    mark.className = "timeline-tick-mark";
+    mark.className =
+      "timeline-tick-mark";
 
     const label =
       document.createElement("span");
 
-    label.className = "timeline-tick-label";
-    label.innerText = formatTimelineYear(year);
+    label.className =
+      "timeline-tick-label";
+
+    label.innerText =
+      formatTimelineYear(year);
 
     tick.appendChild(mark);
     tick.appendChild(label);
@@ -452,25 +478,28 @@ function updateTimelineTicks() {
   }
 }
 
-function updateTimeline(userAnswer, answer) {
-  // First update what the player has logically discovered.
-  updateSearchBounds(userAnswer, answer);
+function updateTimeline(
+  userAnswer,
+  answer,
+) {
+  updateSearchBounds(
+    userAnswer,
+    answer,
+  );
 
-  // Calculate the normal zoom based on the remaining
-  // possible answer range.
   updateTimelineRange();
 
-  // If the latest guess falls outside that zoom,
-  // temporarily expand the displayed timeline.
   ensureGuessIsVisible(userAnswer);
 
   updateTimelineTicks();
 
-  // The cursor always represents the player's latest guess.
   updateTimelineCursor(userAnswer);
 }
 
-function getDirectionHint(userAnswer, answer) {
+function getDirectionHint(
+  userAnswer,
+  answer,
+) {
   if (userAnswer < answer) {
     return "Try a more recent date.";
   }
@@ -483,42 +512,58 @@ function getDirectionHint(userAnswer, answer) {
 }
 
 function displayObject() {
-  const currentObject = getCurrentObject();
+  const currentObject =
+    getCurrentObject();
 
-  if (!validateGameObject(currentObject)) {
+  if (
+    !validateGameObject(currentObject)
+  ) {
     objectImage.removeAttribute("src");
     objectImage.alt = "";
     objectImage.hidden = true;
 
     objectImageFallback.hidden = true;
 
-    objectName.innerText = "Unable to load object";
+    objectName.innerText =
+      "Unable to load object";
+
     objectQuestion.innerText = "";
 
-    feedback.innerText = "This object cannot be played.";
+    feedback.innerText =
+      "This object cannot be played.";
 
     return false;
   }
 
-  const displayData = getObjectDisplayData(currentObject);
+  const displayData =
+    getObjectDisplayData(
+      currentObject,
+    );
 
-  objectName.innerText = displayData.name;
+  objectName.innerText =
+    displayData.name;
 
   objectQuestion.innerHTML =
     `When was the <strong>${displayData.name}</strong> created?`;
 
   if (displayData.image) {
-    objectImage.src = displayData.image;
-    objectImage.alt = displayData.name;
+    objectImage.src =
+      displayData.image;
+
+    objectImage.alt =
+      displayData.name;
+
     objectImage.hidden = false;
 
-    objectImageFallback.hidden = true;
+    objectImageFallback.hidden =
+      true;
   } else {
     objectImage.removeAttribute("src");
     objectImage.alt = "";
     objectImage.hidden = true;
 
-    objectImageFallback.hidden = false;
+    objectImageFallback.hidden =
+      false;
 
     console.warn(
       `Object "${currentObject.id}": missing image. Image unavailable message displayed.`,
@@ -532,16 +577,30 @@ function resetRound() {
   userTries = 0;
   roundFinished = false;
 
-  searchMinYear = DEFAULT_TIMELINE_MIN_YEAR;
-  searchMaxYear = DEFAULT_TIMELINE_MAX_YEAR;
+  searchMinYear =
+    DEFAULT_TIMELINE_MIN_YEAR;
 
-  timelineMinYear = DEFAULT_TIMELINE_MIN_YEAR;
-  timelineMaxYear = DEFAULT_TIMELINE_MAX_YEAR;
+  searchMaxYear =
+    DEFAULT_TIMELINE_MAX_YEAR;
+
+  timelineMinYear =
+    DEFAULT_TIMELINE_MIN_YEAR;
+
+  timelineMaxYear =
+    DEFAULT_TIMELINE_MAX_YEAR;
 
   form.reset();
 
   feedback.innerHTML = "";
   hints.innerText = "";
+
+  document.getElementById(
+    "hint-one-button",
+  ).hidden = true;
+
+  document.getElementById(
+    "hint-two-button",
+  ).hidden = true;
 
   timelineCursor.style.left = "0%";
 
@@ -550,13 +609,20 @@ function resetRound() {
   userAnswerInput.disabled = false;
 
   const submitButton =
-    form.querySelector('button[type="submit"]');
+    form.querySelector(
+      ".game-submit",
+    );
+
+  submitButton.type = "submit";
+  submitButton.textContent =
+    "Submit";
 
   submitButton.disabled = false;
 
   nextObjectButton.hidden = true;
 
-  const objectLoaded = displayObject();
+  const objectLoaded =
+    displayObject();
 
   if (!objectLoaded) {
     userAnswerInput.disabled = true;
@@ -565,23 +631,179 @@ function resetRound() {
   }
 }
 
+function displayLoadingState() {
+  objectImage.removeAttribute("src");
+  objectImage.alt = "";
+  objectImage.hidden = true;
+
+  objectImageFallback.hidden = true;
+
+  objectName.innerText =
+    "Loading object...";
+
+  objectQuestion.innerText = "";
+
+  feedback.innerHTML = "";
+
+  userAnswerInput.disabled = true;
+
+  const submitButton =
+    form.querySelector(
+      ".game-submit",
+    );
+
+  submitButton.disabled = true;
+
+  nextObjectButton.hidden = true;
+}
+
+async function loadRandomObject() {
+  if (isLoadingObject) {
+    return;
+  }
+
+  isLoadingObject = true;
+
+  const previousObject =
+    getCurrentObject();
+
+  const previousObjectId =
+    previousObject?.id ?? null;
+
+  displayLoadingState();
+
+  try {
+    let url =
+      `${window.API_URL}/api/game/object`;
+
+    if (previousObjectId !== null) {
+      url +=
+        `?exclude=${encodeURIComponent(previousObjectId)}`;
+    }
+
+    const response =
+      await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(
+        `HTTP ${response.status}`,
+      );
+    }
+
+    const object =
+      await response.json();
+
+    const normalizedObject =
+      normalizeGameObject(object);
+
+    if (
+      !validateGameObject(
+        normalizedObject,
+      )
+    ) {
+      throw new Error(
+        "Invalid game object received.",
+      );
+    }
+
+    gameObjects = [
+      normalizedObject,
+    ];
+
+    currentObjectIndex = 0;
+
+    resetRound();
+  } catch (error) {
+    console.error(
+      "Unable to load random object:",
+      error,
+    );
+
+    useLocalGameObjects();
+
+    resetRound();
+
+    feedback.innerText =
+      "API unavailable. Local objects are being used.";
+  } finally {
+    isLoadingObject = false;
+  }
+}
+
 function displayHints(answer) {
-  const hintsList = [];
+  document.getElementById(
+    "hint-one-button",
+  ).hidden = userTries < 3;
 
-  if (userTries >= 3) {
-    hintsList.push(getCentury(answer));
-  }
+  document.getElementById(
+    "hint-two-button",
+  ).hidden = userTries < 5;
 
-  if (userTries >= 5) {
-    hintsList.push(getPartialYear(answer));
-  }
+  document.getElementById(
+    "hint-one-text",
+  ).textContent =
+    getCentury(answer);
 
-  hints.innerText = hintsList.join("\n");
+  document.getElementById(
+    "hint-two-text",
+  ).textContent =
+    getPartialYear(answer);
+}
+
+for (const [buttonId, modalId] of [
+  [
+    "hint-one-button",
+    "hint-one-modal",
+  ],
+  [
+    "hint-two-button",
+    "hint-two-modal",
+  ],
+  [
+    "legend-info-button",
+    "legend-modal",
+  ],
+]) {
+  document
+    .getElementById(buttonId)
+    ?.addEventListener(
+      "click",
+      () => {
+        document
+          .getElementById(modalId)
+          ?.showModal();
+      },
+    );
+}
+
+for (
+  const dialog of
+    document.querySelectorAll(
+      ".game-hint-modal",
+    )
+) {
+  dialog
+    .querySelector(
+      ".game-modal-close",
+    )
+    ?.addEventListener(
+      "click",
+      () => dialog.close(),
+    );
+
+  dialog.addEventListener(
+    "click",
+    (event) => {
+      if (event.target === dialog) {
+        dialog.close();
+      }
+    },
+  );
 }
 
 function displayTemperatureFeedback(
   difference,
-  directionHint
+  directionHint,
 ) {
   switch (true) {
     case difference <= 24:
@@ -614,7 +836,10 @@ function displayTemperatureFeedback(
 function winRound(currentObject) {
   roundFinished = true;
 
-  const displayData = getObjectDisplayData(currentObject);
+  const displayData =
+    getObjectDisplayData(
+      currentObject,
+    );
 
   if (displayData.sourceUrl) {
     feedback.innerHTML =
@@ -624,7 +849,8 @@ function winRound(currentObject) {
       `rel="noopener noreferrer">` +
       `Learn more about this object</a>`;
   } else {
-    feedback.innerText = "🥳 You got it!";
+    feedback.innerText =
+      "🥳 You got it!";
 
     console.warn(
       `Object "${currentObject.id}": missing documentary source.`,
@@ -634,66 +860,113 @@ function winRound(currentObject) {
   userAnswerInput.disabled = true;
 
   const submitButton =
-    form.querySelector('button[type="submit"]');
-
-  submitButton.disabled = true;
-
-  nextObjectButton.hidden = false;
-}
-
-form.addEventListener("submit", (event) => {
-  event.preventDefault();
-
-  if (roundFinished) {
-    return;
-  }
-
-  const currentObject = getCurrentObject();
-
-  const formData = new FormData(form);
-
-  const userAnswer =
-    Number(formData.get("user-answer"));
-
-  feedback.innerHTML = "";
-
-  if (userAnswer === currentObject.year) {
-    updateTimelineCursor(userAnswer);
-    winRound(currentObject);
-    return;
-  }
-
-  userTries++;
-
-  const difference =
-    Math.abs(currentObject.year - userAnswer);
-
-  const directionHint =
-    getDirectionHint(
-      userAnswer,
-      currentObject.year
+    form.querySelector(
+      ".game-submit",
     );
 
-  displayTemperatureFeedback(
-    difference,
-    directionHint
+  submitButton.type = "button";
+
+  submitButton.textContent =
+    "Next object";
+
+  submitButton.disabled = false;
+
+  nextObjectButton.hidden = true;
+}
+
+async function advanceToNextObject() {
+  await loadRandomObject();
+}
+
+form
+  .querySelector(".game-submit")
+  .addEventListener(
+    "click",
+    (event) => {
+      if (roundFinished) {
+        event.preventDefault();
+        advanceToNextObject();
+      }
+    },
   );
 
-  displayHints(currentObject.year);
+form.addEventListener(
+  "submit",
+  (event) => {
+    event.preventDefault();
 
-  updateTimeline(
-    userAnswer,
-    currentObject.year
-  );
-});
+    if (roundFinished) {
+      return;
+    }
 
-nextObjectButton.addEventListener("click", () => {
-  currentObjectIndex =
-    (currentObjectIndex + 1) % gameObjects.length;
+    const currentObject =
+      getCurrentObject();
 
-  resetRound();
-});
+    if (!currentObject) {
+      return;
+    }
 
-setGameObjects(LOCAL_GAME_OBJECTS);
+    const formData =
+      new FormData(form);
 
-resetRound();
+    const userAnswer =
+      Number(
+        formData.get(
+          "user-answer",
+        ),
+      );
+
+    feedback.innerHTML = "";
+
+    if (
+      userAnswer ===
+      currentObject.year
+    ) {
+      updateTimelineCursor(
+        userAnswer,
+      );
+
+      winRound(currentObject);
+
+      return;
+    }
+
+    userTries++;
+
+    const difference =
+      Math.abs(
+        currentObject.year -
+          userAnswer,
+      );
+
+    const directionHint =
+      getDirectionHint(
+        userAnswer,
+        currentObject.year,
+      );
+
+    displayTemperatureFeedback(
+      difference,
+      directionHint,
+    );
+
+    displayHints(
+      currentObject.year,
+    );
+
+    updateTimeline(
+      userAnswer,
+      currentObject.year,
+    );
+
+    userAnswerInput.value = "";
+    userAnswerInput.focus();
+  },
+);
+
+nextObjectButton.addEventListener(
+  "click",
+  advanceToNextObject,
+);
+
+loadRandomObject();

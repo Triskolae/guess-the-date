@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -11,71 +12,132 @@
 
     <title>Play | Guess the Date</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <link
       href="https://fonts.googleapis.com/css2?family=Beau+Rivage&family=Cormorant+Infant:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Eagle+Lake&family=Fondamento:ital@0;1&family=Great+Vibes&family=Imperial+Script&family=Italianno&family=MonteCarlo&family=Quintessential&family=Updock&display=swap"
       rel="stylesheet"
-    >
+    />
 
     <link rel="stylesheet" href="assets/style.css" />
   </head>
 
-  <body>
+  <body class="page-game">
     <app-header></app-header>
 
     <main class="game-page">
-      <header class="game-header">
-        <p class="game-kicker">Mystery object</p>
-
-        <h1>Guess the Date</h1>
-
-        <p>Observe the object and try to find when it was created.</p>
-      </header>
-
       <section class="game" aria-labelledby="object-question">
-        <div class="game-object">
-          <img id="object-image" src="" alt="" />
 
-          <p id="object-image-fallback" hidden>Image unavailable</p>
+        <!-- Contenu principal de la feuille -->
+        <div class="game-content">
 
-          <h2 id="object-name"></h2>
-        </div>
+          <!-- Colonne gauche : objet mystère -->
+          <div class="game-object">
+            <div class="game-object-frame">
+              <img id="object-image" src="" alt="" />
 
-        <form id="answer-form" class="game-form">
-          <p id="object-question"></p>
+              <p id="object-image-fallback" hidden>
+                Image unavailable
+              </p>
+            </div>
 
-          <div class="answer-field">
-            <label for="user-answer">Your answer</label>
-
-            <input
-              type="number"
-              name="user-answer"
-              id="user-answer"
-              placeholder="Enter a year"
-              required
-            />
-
-            <button type="submit" class="button button-primary">Submit</button>
+            <h2 id="object-name"></h2>
           </div>
 
-          <div id="feedback" class="game-feedback" aria-live="polite"></div>
+          <!-- Colonne droite : interactions -->
+          <form id="answer-form" class="game-form">
+            <p id="object-question"></p>
 
-          <div id="hints" class="game-hints" aria-live="polite"></div>
+            <div class="answer-field">
+              <label for="user-answer" class="sr-only">
+                Your answer
+              </label>
 
-          <button
-            type="button"
-            id="next-object"
-            class="button button-primary"
-            hidden
-          >
-            Next object
-          </button>
-        </form>
+              <input
+                type="number"
+                name="user-answer"
+                id="user-answer"
+                placeholder="Enter a year"
+                required
+              />
 
-        <section class="timeline-section" aria-labelledby="timeline-title">
-          <h2 id="timeline-title">Timeline</h2>
+              <button
+                type="submit"
+                class="button button-primary game-submit"
+                aria-label="Submit your answer"
+              >
+                SUBMIT
+              </button>
+            </div>
+
+            <!-- Retour chaud / froid -->
+            <div
+              id="feedback"
+              class="game-feedback"
+              aria-live="polite"
+            ></div>
+
+            <!-- Indices disponibles -->
+            <div class="game-hint-actions">
+              <button
+                type="button"
+                id="hint-one-button"
+                class="game-hint-button"
+                aria-label="Open first hint"
+                aria-haspopup="dialog"
+                hidden
+              >
+                <img
+                  src="ressources-design/Ampoule-Idea.png"
+                  alt=""
+                />
+                <span class="game-hint-label">First hint available!</span>
+              </button>
+
+              <button
+                type="button"
+                id="hint-two-button"
+                class="game-hint-button"
+                aria-label="Open second hint"
+                aria-haspopup="dialog"
+                hidden
+              >
+                <img
+                  src="ressources-design/Ampoule-Idea.png"
+                  alt=""
+                />
+                <span class="game-hint-label">Second hint available!</span>
+              </button>
+            </div>
+
+            <!-- Contenu existant conservé pour main.js -->
+            <div
+              id="hints"
+              class="game-hints"
+              aria-live="polite"
+              hidden
+            ></div>
+
+            <button
+              type="button"
+              id="next-object"
+              class="button button-primary"
+              hidden
+            >
+              NEXT OBJECT
+            </button>
+          </form>
+        </div>
+
+        <!-- Frise chronologique -->
+        <section
+          class="timeline-section"
+          aria-labelledby="timeline-title"
+        >
+          <h2 id="timeline-title" class="sr-only">
+            Timeline
+          </h2>
 
           <div class="timeline">
             <div class="timeline-labels" aria-hidden="true">
@@ -99,20 +161,56 @@
           </div>
         </section>
 
+        <!-- Légende accessible via le bouton information -->
         <aside class="game-help">
-          <h2>How close are you?</h2>
-
-          <div id="legend" class="game-legend">
-            <div>🥳 Correct</div>
-            <div>🔥 1–24 years away — Burning</div>
-            <div>🥵 25–49 years away — Hot</div>
-            <div>😎 50–79 years away — Warm</div>
-            <div>🥶 80–99 years away — Cold</div>
-            <div>🧊 100+ years away — Freezing</div>
-          </div>
+          <button type="button" id="legend-info-button" class="game-info-button" aria-label="Temperature guide" aria-haspopup="dialog" title="Temperature guide"><img src="ressources-design/info_sphere_clean.png" alt="" /></button>
         </aside>
       </section>
     </main>
+
+    <dialog id="legend-modal" class="game-hint-modal">
+      <div class="game-hint-modal-content">
+        <button type="button" class="game-modal-close" aria-label="Close temperature guide">&times;</button>
+        <h2>How close are you?</h2>
+        <div class="game-legend">
+          <div>🥳 Correct</div><div>🔥 1–24 years away — Burning</div>
+          <div>🥵 25–49 years away — Hot</div><div>😎 50–79 years away — Warm</div>
+          <div>🥶 80–99 years away — Cold</div><div>🧊 100+ years away — Freezing</div>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Modale du premier indice -->
+    <dialog id="hint-one-modal" class="game-hint-modal">
+      <div class="game-hint-modal-content">
+        <button
+          type="button"
+          class="game-modal-close"
+          aria-label="Close hint"
+        >
+          &times;
+        </button>
+
+        <h2>First clue</h2>
+        <p id="hint-one-text"></p>
+      </div>
+    </dialog>
+
+    <!-- Modale du deuxième indice -->
+    <dialog id="hint-two-modal" class="game-hint-modal">
+      <div class="game-hint-modal-content">
+        <button
+          type="button"
+          class="game-modal-close"
+          aria-label="Close hint"
+        >
+          &times;
+        </button>
+
+        <h2>Second clue</h2>
+        <p id="hint-two-text"></p>
+      </div>
+    </dialog>
 
     <footer class="site-footer">
       <nav aria-label="Footer navigation">

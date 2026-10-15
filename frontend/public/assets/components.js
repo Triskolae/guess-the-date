@@ -1,6 +1,9 @@
-// Composant Nav
 class AppHeader extends HTMLElement {
   connectedCallback() {
+    this.render();
+  }
+
+  render() {
     this.innerHTML = `
       <header class="site-header">
         <a href="index.html" class="site-logo" aria-label="Guess the Date — Home">
@@ -16,21 +19,58 @@ class AppHeader extends HTMLElement {
           </picture>
         </a>
 
-        <nav class="main-nav" aria-label="Main navigation">
+        <button type="button" class="game-menu-toggle" aria-label="Open menu" aria-controls="game-navigation" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <nav class="main-nav" id="game-navigation" aria-label="Main navigation">
           <ul>
+          <li><a href="index.html">Home</a></li>
           <li>
             <a href="game.html" class="play-game">Play</a>
           </li>
           <li>
             <a href="about.html">About</a>
           </li>
-          <li>
-            <a href="login.html">Log in</a>
-          </li>
+          <li class="nav-account-item" hidden><a href="account.html">Account</a></li>
+          <li class="nav-login-item"><a href="login.html">Log in</a></li>
           </ul>
         </nav>
       </header>
     `;
+    // L'authentification repose sur le cookie de session HTTP-Only.
+    // Attendre le chargement de auth.js (inclus après components.js).
+    const updateAuthNavigation = async () => {
+      if (typeof window.checkAuthStatus !== "function") return;
+      const accountItem = this.querySelector(".nav-account-item");
+      const loginItem = this.querySelector(".nav-login-item");
+      try {
+        const user = await window.checkAuthStatus();
+        if (!this.isConnected) return;
+        accountItem.hidden = !user;
+        loginItem.hidden = Boolean(user);
+      } catch (error) {
+        accountItem.hidden = true;
+        loginItem.hidden = false;
+      }
+    };
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", updateAuthNavigation, { once: true });
+    } else {
+      updateAuthNavigation();
+    }
+    const toggle = this.querySelector(".game-menu-toggle");
+    const nav = this.querySelector(".main-nav");
+    toggle?.addEventListener("click", () => {
+      const isOpen = nav.classList.toggle("game-nav-open");
+      toggle.setAttribute("aria-expanded", String(isOpen));
+      toggle.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
+    });
+    document.addEventListener("click", (event) => {
+      if (!this.contains(event.target) && nav.classList.contains("game-nav-open")) {
+        nav.classList.remove("game-nav-open");
+        toggle?.setAttribute("aria-expanded", "false");
+      }
+    });
   }
 }
 customElements.define("app-header", AppHeader);
@@ -63,7 +103,7 @@ class AuthModal extends HTMLElement {
       <div id="auth-modal" class="modal hidden">
         <div class="modal-content">
           <span class="close-btn">&times;</span>
-          
+
           <!-- Zone d'affichage des retours utilisateur -->
           <div id="auth-feedback" class="auth-feedback-msg hidden"></div>
 
