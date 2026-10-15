@@ -1480,6 +1480,28 @@ body:has(.account-page) {
   flex: 0 0 auto;
 }
 
+body:has(.badge-levels-details[open])::before {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  background: rgba(35, 22, 13, 0.42);
+  content: "";
+}
+
+body:has(.badge-levels-details[open]) {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html:has(.badge-levels-details[open]) {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.badge-levels-details[open] {
+  z-index: 21;
+}
+
 .badge-levels-details summary {
   display: grid;
   width: 26px;
@@ -1514,29 +1536,46 @@ body:has(.account-page) {
 }
 
 .badge-levels-popup {
-  position: absolute;
-  z-index: 5;
-  top: calc(100% + 10px);
+  position: fixed;
+  z-index: 1;
+  top: 50%;
   left: 50%;
   isolation: isolate;
   box-sizing: border-box;
-  width: min(520px, calc(100vw - 24px));
-  max-height: calc(100vh - 24px);
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
   overflow-y: auto;
-  padding: clamp(92px, 20vh, 108px) clamp(24px, 7vw, 48px);
+  overscroll-behavior: contain;
+  padding: clamp(112px, 18vh, 132px) clamp(36px, 7vw, 56px) clamp(100px, 16vh, 120px);
+  padding-left: calc(clamp(36px, 7vw, 56px) + 18px);
   color: var(--color-brown, #4A2B17);
   text-shadow: 0 1px 2px rgba(50, 26, 12, 0.28);
   background: transparent;
   border: 0;
   box-shadow: none;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
+  transform-origin: center top;
+}
+
+.badge-levels-popup.is-opening {
+  animation: parchment-unroll 850ms cubic-bezier(0.22, 0.75, 0.24, 1) both;
+}
+
+.badge-levels-popup.is-closing {
+  animation: parchment-roll-up 720ms cubic-bezier(0.55, 0, 0.75, 0.35) both;
+}
+
+.badge-levels-popup > * {
+  position: relative;
+  z-index: 1;
 }
 
 .badge-levels-popup::before {
   position: absolute;
   z-index: -1;
   inset: 0;
-  background: url("../ressources-design/parchemin-V1.webp") center / 160% 100% no-repeat;
+  background: url("../ressources-design/parchemin-v3.png") center / 160% 100% no-repeat;
   content: "";
   filter: drop-shadow(0 8px 10px rgba(50, 26, 12, 0.28));
 }
@@ -1584,7 +1623,74 @@ body:has(.account-page) {
   border-bottom: 1px dotted rgba(115, 69, 30, 0.32);
   font-size: 0.88rem;
   line-height: 1.35;
-  white-space: nowrap;
+  white-space: normal;
+}
+
+@keyframes parchment-unroll {
+  from {
+    clip-path: inset(0 0 92% 0);
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleY(0.78);
+  }
+
+  to {
+    clip-path: inset(0);
+    opacity: 1;
+    transform: translate(-50%, -50%) scaleY(1);
+  }
+}
+
+@keyframes parchment-roll-up {
+  from {
+    clip-path: inset(0);
+    opacity: 1;
+    transform: translate(-50%, -50%) scaleY(1);
+  }
+
+  to {
+    clip-path: inset(0 0 92% 0);
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleY(0.78);
+  }
+}
+
+@media (max-width: 600px) {
+  .badge-levels-popup {
+    width: calc(100vw - 20px);
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
+    padding: clamp(84px, 12vh, 96px) 34px clamp(78px, 11vh, 90px);
+    padding-left: 44px;
+  }
+
+  .badge-levels-popup h3 {
+    font-size: 1.2rem;
+  }
+
+  .badge-levels-popup p {
+    font-size: 0.82rem;
+  }
+
+  .badge-levels-popup ol {
+    gap: 0 10px;
+  }
+
+  .badge-levels-popup li {
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-height: 620px) {
+  .badge-levels-popup {
+    padding-block: 82px 76px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge-levels-popup.is-opening,
+  .badge-levels-popup.is-closing {
+    animation: none;
+  }
 }
 
 .badge-levels-popup li strong {
