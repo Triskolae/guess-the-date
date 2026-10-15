@@ -12,6 +12,7 @@ const db = require("./src/database/db");
 const authRoutes = require("./src/routes/auth.routes");
 const userRoutes = require("./src/routes/user.routes");
 const onboardingRoutes = require("./src/routes/onboarding.routes");
+const gameRoutes = require("./src/routes/game.routes");
 
 const app = express();
 const server = http.createServer(app);
@@ -40,6 +41,7 @@ app.use(morgan("dev"));
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/onboarding", onboardingRoutes);
+app.use("/api/game", gameRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
