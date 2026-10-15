@@ -32,9 +32,9 @@ const objectImageFallback = document.getElementById(
   "object-image-fallback",
 );
 
-const DEFAULT_TIMELINE_MIN_YEAR = -3000;
-const DEFAULT_TIMELINE_MAX_YEAR =
-  new Date().getFullYear();
+const MIN_TIMELINE_YEAR = -3000;
+const DEFAULT_TIMELINE_MIN_YEAR = MIN_TIMELINE_YEAR;
+const DEFAULT_TIMELINE_MAX_YEAR = new Date().getFullYear();
 
 let searchMinYear = DEFAULT_TIMELINE_MIN_YEAR;
 let searchMaxYear = DEFAULT_TIMELINE_MAX_YEAR;
@@ -83,10 +83,6 @@ function normalizeGameObject(object) {
 }
 
 function getHistoricalPeriod(year) {
-  if (year < -3000) {
-    return "Prehistory";
-  }
-
   if (year <= 476) {
     return "Antiquity";
   }
@@ -303,7 +299,8 @@ function updateTimelineRange() {
     minYear = maxYear - zoomStep;
   }
 
-  timelineMinYear = minYear;
+  // Blocage à -3000 minimum
+  timelineMinYear = Math.max(MIN_TIMELINE_YEAR, minYear);
   timelineMaxYear = maxYear;
 }
 
@@ -387,7 +384,8 @@ function ensureGuessIsVisible(userAnswer) {
       maxYear - newRange;
   }
 
-  timelineMinYear = minYear;
+  // Blocage à -3000 minimum
+  timelineMinYear = Math.max(MIN_TIMELINE_YEAR, minYear);
   timelineMaxYear = maxYear;
 }
 
