@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 60" preserveAspectRatio="none">
+  <defs>
+    <filter id="worn-edge" x="-2%" y="-30%" width="104%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02 0.28" numOctaves="2" seed="31" result="grain" />
+      <feDisplacementMap in="SourceGraphic" in2="grain" scale="3.6" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+    <linearGradient id="top-ink">
+      <stop stop-color="#73451e" stop-opacity=".28" />
+      <stop offset=".16" stop-color="#73451e" stop-opacity=".6" />
+      <stop offset=".34" stop-color="#73451e" stop-opacity=".42" />
+      <stop offset=".54" stop-color="#73451e" stop-opacity=".72" />
+      <stop offset=".68" stop-color="#73451e" stop-opacity=".08" />
+      <stop offset=".83" stop-color="#73451e" stop-opacity=".52" />
+      <stop offset="1" stop-color="#73451e" stop-opacity=".36" />
+    </linearGradient>
+    <linearGradient id="bottom-ink">
+      <stop stop-color="#73451e" stop-opacity=".65" />
+      <stop offset=".18" stop-color="#73451e" stop-opacity=".3" />
+      <stop offset=".36" stop-color="#73451e" stop-opacity=".68" />
+      <stop offset=".58" stop-color="#73451e" stop-opacity=".14" />
+      <stop offset=".78" stop-color="#73451e" stop-opacity=".5" />
+      <stop offset=".91" stop-color="#73451e" stop-opacity=".08" />
+      <stop offset="1" stop-color="#73451e" stop-opacity=".56" />
+    </linearGradient>
+    <linearGradient id="side-ink" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#73451e" stop-opacity=".35" />
+      <stop offset=".18" stop-color="#73451e" stop-opacity=".66" />
+      <stop offset=".4" stop-color="#73451e" stop-opacity=".1" />
+      <stop offset=".61" stop-color="#73451e" stop-opacity=".52" />
+      <stop offset=".8" stop-color="#73451e" stop-opacity=".18" />
+      <stop offset="1" stop-color="#73451e" stop-opacity=".62" />
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke-linecap="round" filter="url(#worn-edge)">
+    <path d="M11 9 C93 12 180 7 270 10 S427 8 516 11 S676 8 769 10 S914 7 989 11" stroke="url(#top-ink)" stroke-width="2.1" />
+    <path d="M17 14 C117 17 203 12 294 15 S451 13 545 16 S707 13 798 15 S926 12 983 16" stroke="url(#top-ink)" stroke-width=".8" opacity=".72" />
+    <path d="M12 48 C105 51 190 46 286 49 S441 47 536 50 S696 47 791 49 S925 46 988 50" stroke="url(#bottom-ink)" stroke-width="2.2" />
+    <path d="M18 43 C111 46 199 41 294 44 S453 42 547 45 S706 42 801 44 S921 41 982 45" stroke="url(#bottom-ink)" stroke-width=".8" opacity=".7" />
+    <path d="M12 10 C15 22 10 36 13 49" stroke="url(#side-ink)" stroke-width="2" />
+    <path d="M18 15 C21 26 16 36 19 44" stroke="url(#side-ink)" stroke-width=".8" opacity=".68" />
+    <path d="M988 11 C985 24 991 37 987 49" stroke="url(#side-ink)" stroke-width="1.9" />
+    <path d="M982 16 C979 27 984 36 981 45" stroke="url(#side-ink)" stroke-width=".75" opacity=".68" />
+  </g>
+  <path d="M185 5 L190 10 L185 15 L180 10 Z" fill="#73451e" opacity=".52" />
+  <path d="M812 44 L817 49 L812 54 L807 49 Z" fill="#73451e" opacity=".62" />
+</svg>
