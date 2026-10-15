@@ -67,7 +67,7 @@ async function getPreferences(req, res) {
     const categories = await db("user_categories")
       .where({ user_id: userId })
       .count();
-    const hasCompletedOnboarding = !!eras[0].count || !!categories[0].count;
+    const hasCompletedOnboarding = !!+eras[0]?.count || !!+categories[0]?.count;
 
     return res.status(200).json({
       hasCompletedOnboarding,
