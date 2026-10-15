@@ -615,8 +615,6 @@ Ces changements ont été intégrés à `preprod`.
 
 `login.html`, `assets/login.js`, `assets/auth.js` et `assets/components.js` couvrent l'interface de connexion/inscription, la vérification e-mail, les interactions du menu et la gestion d'une fenêtre d'authentification réutilisable. Les requêtes nécessitant le cookie de session utilisent `credentials: 'include'`.
 
-**À vérifier en QA :** cohérence des parcours de connexion entre page dédiée et modale, messages d'erreur, expiration du code et navigation après authentification.
-
 ### 13.5 Responsive et Accessibilité
 
 Le responsive est en cours d'harmonisation entre les pages. Les points de contrôle comprennent les petits écrans, la navigation au clavier, les libellés accessibles, les contrastes, les états de focus, les alternatives textuelles et l'absence de débordements.
@@ -877,6 +875,8 @@ L'architecture documentée utilise une instance PostgreSQL avec deux schémas :
 
 - `public` pour la production.
 
+- **RLS stricte sur les données utilisateur :** Activation de la Row Level Security (RLS) sur `users`, `user_eras` et `user_categories`.
+
 Les paramètres de connexion sont fournis au serveur par variables d'environnement. Ne jamais committer les mots de passe ou chaînes de connexion.
 
 ### 22.2 Back-End — Northflank
@@ -968,6 +968,8 @@ La connexion utilise `POST /api/auth/login`. Après authentification, un JWT est
 
 - Le cookie est configuré avec `SameSite=Lax` en développement et `SameSite=None` avec `Secure` pour les environnements `staging` / `production`, selon `NODE_ENV`.
 
+- Endpoint `POST /api/auth/login` mis à jour : Retourne désormais le statut hasCompletedOnboarding en vérifiant si des préférences existent déjà pour l'utilisateur dans user_eras.
+
 ### 24.4 Points de Sécurité et de Recette
 
 - Vérifier les durées de validité, la limitation des tentatives et les erreurs de vérification OTP.
@@ -1022,7 +1024,7 @@ La V0 doit être jouable de bout en bout, sans données d'objet codées en dur d
 
 - **V0.5 :** enrichissement des comptes, statistiques et badges persistants ; finalisation des paramètres utilisateur ; progression par période et rareté.
 
-- **Évolutions de contenu :** banque d'objets étendue, validation éditoriale, intégration éventuelle d'API patrimoniales et meilleure gestion des crédits.
+- **Évolutions de contenu :** validation éditoriale et meilleure gestion des crédits.
 
 - **Multijoueur :** matchmaking ou invitation 1v1, état de partie serveur, synchronisation Socket.IO, score et chronomètre.
 
@@ -1064,4 +1066,191 @@ Le périmètre de chaque version devra être confirmé collectivement avant d'ê
 
 - La stratégie de tests, de conformité des images et de protection des données.
 
-**Ce document décrit l'état du dépôt analysé et les décisions de cadrage disponibles ; il doit être révisé à mesure que les fonctionnalités sont intégrées et validées.**
+## 28. Import des objets historiques — Metropolitan Museum of Art
+
+### Objectif
+
+Le script `src/utils/import-met-objects.js` permet d’importer des objets historiques issus de la collection du Metropolitan Museum of Art (The Met) afin d’alimenter la base de données du jeu.
+
+Chaque objet importé est associé à une catégorie, à une période historique et à une image stockée sur Cloudflare R2.
+
+### Sources de données
+
+L’import utilise l’API publique du Metropolitan Museum of Art :
+
+- Recherche d’objets : `https://collectionapi.metmuseum.org/public/collection/v1.1/search`
+- Récupération des détails : `https://collectionapi.metmuseum.org/public/collection/v1/objects/{objectID}`
+
+Les recherches sont effectuées à partir de termes associés aux catégories du jeu. Les fiches sont ensuite vérifiées individuellement avant leur import.
+
+Les objets retenus doivent notamment :
+- Être déclarés dans le domaine public par le musée (`isPublicDomain === true`).
+- Disposer d’une image.
+- Correspondre aux critères de sélection des objets physiques.
+- Avoir une datation exploitable.
+- Pouvoir être associés à une période historique.
+- Ne pas faire doublon avec un objet ou un titre déjà retenu.
+
+### Catégories et quotas
+
+Le batch `v1` vise un total de **200 objets**, répartis entre neuf catégories.
+
+| Catégorie | Quota |
+|---|---:|
+| Vie quotidienne (`everyday_life`) | 23 |
+| Science (`science`) | 23 |
+| Technologie (`technology`) | 23 |
+| Transport (`transport`) | 22 |
+| Art et culture (`art_culture`) | 22 |
+| Médecine (`medicine`) | 22 |
+| Militaire (`military`) | 22 |
+| Sports et loisirs (`sport_leisure`) | 22 |
+| Industrie et ingénierie (`industry_engineering`) | 21 |
+| **Total** | **200** |
+
+Les termes de recherche sont mélangés aléatoirement avant chaque exécution afin de varier l’ordre d’exploration.
+
+### Traitement d’un objet
+
+Pour chaque identifiant renvoyé par l’API, le script :
+
+1. Vérifie si l’objet a déjà été traité ou s’il existe en base de données.
+2. Récupère sa fiche complète auprès du Met.
+3. Vérifie son éligibilité : domaine public, présence d’une image, nature de l’objet et datation.
+4. Détermine la période historique à partir de ses années de début et de fin.
+5. Écarte les titres déjà utilisés et limite les répétitions d’un même type d’objet.
+6. Télécharge l’image et l’envoie vers Cloudflare R2.
+7. Insère les métadonnées de l’objet dans la table `objects`.
+8. Ajoute une entrée correspondante au manifeste du batch.
+
+Les métadonnées conservées comprennent notamment le titre, la description, le créateur, la catégorie, la période, les dates, les informations de provenance et les droits de l’image.
+
+### Datation et périodes historiques
+
+La datation est normalisée à partir des informations fournies par l’API. Les années invalides ou les dates non exploitables sont rejetées.
+
+Le script utilise une année représentative de la datation pour déterminer la période historique de l’objet. La période retenue est référencée par son identifiant dans la table `eras`.
+
+Les périodes utilisées sont :
+
+- `prehistory`
+- `antiquity`
+- `middle_ages`
+- `modern_era`
+- `contemporary_era`
+
+### Stockage des images sur Cloudflare R2
+
+Les images sont téléchargées depuis les URL fournies par le Met, puis stockées dans le bucket R2.
+
+Préfixe utilisé pour le batch :
+
+`game_objects/met/v1/`
+
+Les fichiers sont organisés sous la forme :
+
+`game_objects/met/v1/objects/{objectID}.{ext}`
+
+Le script :
+- Privilégie l’image de petite taille (`primaryImageSmall`) lorsqu’elle est disponible.
+- Vérifie que la taille du fichier ne dépasse pas 12 Mo.
+- Vérifie la signature du fichier pour accepter les formats JPEG, PNG et WebP.
+- Conserve l’URL de l’image source et les informations de droits disponibles.
+
+Les images sont stockées séparément des métadonnées en base de données. Le champ `image_url` référence l’image utilisée par le jeu, tandis que `image_source_url` et `image_rights` conservent les informations de provenance et de droits.
+
+### Organisation des données en base
+
+Les objets importés sont enregistrés dans la table `objects`.
+
+Les principales informations enregistrées sont :
+
+- `source` : source de données, ici `met`.
+- `source_object_id` : identifiant de l’objet dans la collection du Met.
+- `batch_name` : version du batch, ici `v1`.
+- `category_id` et `era_id` : références aux tables de catégories et de périodes.
+- `year_start` et `year_end` : limites de la datation.
+- `date_display` : datation destinée à l’affichage.
+- `image_url`, `image_source_url` et `image_rights` : informations relatives à l’image.
+- `source_url` : lien vers la fiche originale du musée.
+- `source_metadata` : métadonnées complémentaires, dont la clé R2.
+
+La combinaison de `source` et `source_object_id` est unique afin d’éviter l’import en double d’un même objet provenant de la même source.
+
+### Limitation du nombre de candidats par recherche
+
+Chaque terme de recherche dispose de ses propres compteurs :
+
+- `importedForQuery` : nombre d’objets importés avec succès pour le terme courant.
+- `candidatesForQuery` : nombre d’identifiants inédits examinés pour ce terme.
+- `MAX_CANDIDATES_PER_QUERY` : limite maximale de candidats examinés par terme.
+- `processed` : compteur global des candidats parcourus pour la catégorie courante.
+- `rejected` : nombre de candidats rejetés ou ignorés.
+
+La limite prévue est de **20 candidats examinés par terme**, avec un maximum de **2 imports réussis par terme**.
+
+Une première vérification de cette limite est effectuée dans la boucle paginée. Une seconde vérification est nécessaire dans la boucle interne qui parcourt les identifiants d’une page : sans elle, le script peut continuer à examiner les autres identifiants de la page après avoir atteint la limite de 20.
+
+Le compteur `candidatesForQuery` est incrémenté après la vérification des identifiants déjà vus, avant le traitement de la fiche. Les candidats rejetés comptent donc dans cette limite.
+
+Cette restriction évite qu’un terme trop générique — par exemple `inkstand` ou `box` — monopolise le temps d’import avec de nombreuses fiches similaires.
+
+### Journalisation et diagnostic
+
+Le script journalise les principales étapes du traitement :
+
+- Début de l’import et de chaque catégorie.
+- Terme de recherche en cours.
+- Identifiants examinés et compteurs d’imports et de rejets.
+- Requêtes HTTP et codes de réponse.
+- Récupération des fiches d’objets.
+- Téléchargement des images et envoi vers R2.
+- Résultat de chaque import.
+- Bilan de chaque terme de recherche et de chaque catégorie.
+
+Les horodatages et les durées écoulées facilitent le diagnostic des lenteurs et des erreurs réseau.
+
+Les erreurs de récupération d’une fiche ou de traitement d’un candidat sont journalisées et, lorsqu’elles sont récupérables, le script passe au candidat suivant. Une erreur identifiée comme `MET_BLOCKED` est propagée pour interrompre l’import.
+
+### Manifeste du batch
+
+Les objets importés sont ajoutés à un manifeste contenant notamment :
+
+- La source et l’identifiant d’origine.
+- Le titre.
+- La catégorie et la période historique.
+- Les dates normalisées.
+- L’URL de l’image et sa provenance.
+- Les droits de l’image.
+- La clé de stockage R2.
+- L’URL de la fiche du musée.
+
+Le manifeste est destiné à être stocké dans :
+
+`game_objects/met/v1/manifest.json`
+
+Il permet de retrouver les objets associés au batch et de vérifier leur correspondance avec les fichiers présents dans R2.
+
+**Attention :** si l’exécution échoue avant l’écriture finale du manifeste, des objets peuvent déjà avoir été insérés en base et des images envoyées vers R2. Il faut donc tenir compte des imports partiels avant de relancer le script.
+
+### Exécution
+
+Depuis le répertoire contenant le projet :
+
+```bash
+node --trace-uncaught src/utils/import-met-objects.js
+```
+
+Le script charge les variables d’environnement, initialise la connexion Knex à la base de données, vérifie les tables de référence et initialise l’import.
+
+Les paramètres de connexion à la base de données et à Cloudflare R2 doivent être configurés dans les variables d’environnement appropriées.
+
+### Limites et précautions
+
+- Le quota de 200 objets est un objectif, pas une garantie : le nombre de résultats admissibles dépend des fiches disponibles et des critères de validation.
+- Les quotas par catégorie peuvent ne pas être atteints si trop de candidats sont rejetés.
+- La limite de candidats par terme doit être appliquée dans les deux boucles de recherche.
+- Les doublons de titres sont écartés, ce qui peut réduire le nombre d’objets importables pour certains termes.
+- L’upload R2 précède l’insertion en base de données : un échec de l’insertion peut laisser un fichier orphelin dans R2.
+- Une relance n’est pas nécessairement une reprise automatique. Le contrôle du batch existant et la gestion du manifeste doivent être pris en compte avant toute nouvelle exécution.
+
