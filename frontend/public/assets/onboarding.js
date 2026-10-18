@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", async () => {
   const baseUrl = window.API_URL || "";
 
@@ -21,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
   } catch (err) {
-    console.error("Erreur vérification préférences :", err);
+    console.error("Error checking preferences:", err);
   }
 
   const step1 = document.getElementById("step-1");
@@ -47,7 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   btnToStep3?.addEventListener("click", () => {
     const selectedEra = document.querySelector('input[name="era_id"]:checked');
     if (!selectedEra) {
-      alert("Veuillez sélectionner une époque.");
+      alert("Please select an era.");
       return;
     }
     goToStep(step3);
@@ -60,14 +61,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       credentials: "include",
     });
 
-    if (!response.ok) throw new Error("Erreur de chargement des options.");
+    if (!response.ok) throw new Error("Error loading options.");
 
     const { eras, categories } = await response.json();
 
     renderEras(eras);
     renderCategories(categories);
   } catch (error) {
-    console.error("Erreur onboarding :", error);
+    console.error("Onboarding error:", error);
   }
 
   function renderEras(eras) {
@@ -90,9 +91,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function formatEraYears(start, end) {
-    if (start === null && end !== null) return `Avant ${end}`;
-    if (start !== null && end === null) return `Depuis ${start}`;
-    if (start !== null && end !== null) return `${start} à ${end}`;
+    if (start === null && end !== null) return `Before ${end}`;
+    if (start !== null && end === null) return `Since ${start}`;
+    if (start !== null && end !== null) return `${start} to ${end}`;
     return "";
   }
 
@@ -146,12 +147,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       ).map((cb) => parseInt(cb.value, 10));
 
       if (!selectedEraId) {
-        alert("Veuillez choisir une époque.");
+        alert("Please select an era.");
         return;
       }
 
       if (selectedCategoryIds.length === 0 || selectedCategoryIds.length > 3) {
-        alert("Veuillez choisir entre 1 et 3 catégories.");
+        alert("Please select between 1 and 3 categories.");
         return;
       }
 
@@ -162,7 +163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           credentials: "include",
           body: JSON.stringify({
             game_mode: gameMode,
-            era_ids: [selectedEraId], // Transmis en tableau pour réutiliser la même route API
+            era_ids: [selectedEraId], // Sent as an array to reuse the same API route.
             category_ids: selectedCategoryIds,
           }),
         });
@@ -171,11 +172,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           goToStep(step4);
         } else {
           const data = await response.json();
-          alert(data.message || "Erreur lors de l'enregistrement.");
+          alert(data.message || "Error saving your preferences.");
         }
       } catch (error) {
-        console.error("Erreur de sauvegarde :", error);
-        alert("Erreur réseau lors de la sauvegarde.");
+        console.error("Error saving preferences:", error);
+        alert("Network error while saving your preferences.");
       }
     });
   }

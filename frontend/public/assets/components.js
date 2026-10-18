@@ -1,3 +1,4 @@
+
 class AppHeader extends HTMLElement {
   connectedCallback() {
     this.render();
@@ -37,15 +38,19 @@ class AppHeader extends HTMLElement {
         </nav>
       </header>
     `;
-    // L'authentification repose sur le cookie de session HTTP-Only.
-    // Attendre le chargement de auth.js (inclus après components.js).
+
+    // Authentication relies on the HTTP-only session cookie.
+    // Wait for auth.js to load (included after components.js).
     const updateAuthNavigation = async () => {
       if (typeof window.checkAuthStatus !== "function") return;
+
       const accountItem = this.querySelector(".nav-account-item");
       const loginItem = this.querySelector(".nav-login-item");
+
       try {
         const user = await window.checkAuthStatus();
         if (!this.isConnected) return;
+
         accountItem.hidden = !user;
         loginItem.hidden = Boolean(user);
       } catch (error) {
@@ -53,18 +58,22 @@ class AppHeader extends HTMLElement {
         loginItem.hidden = false;
       }
     };
+
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", updateAuthNavigation, { once: true });
     } else {
       updateAuthNavigation();
     }
+
     const toggle = this.querySelector(".game-menu-toggle");
     const nav = this.querySelector(".main-nav");
+
     toggle?.addEventListener("click", () => {
       const isOpen = nav.classList.toggle("game-nav-open");
       toggle.setAttribute("aria-expanded", String(isOpen));
       toggle.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
     });
+
     document.addEventListener("click", (event) => {
       if (!this.contains(event.target) && nav.classList.contains("game-nav-open")) {
         nav.classList.remove("game-nav-open");
@@ -73,9 +82,10 @@ class AppHeader extends HTMLElement {
     });
   }
 }
+
 customElements.define("app-header", AppHeader);
 
-// Écoute de l'événement global pour ouvrir la modale d'authentification
+// Listen for the global event that opens the authentication modal.
 window.addEventListener("open-auth-modal", () => {
   const authModal = document.getElementById("auth-modal");
   if (authModal) {
@@ -83,7 +93,7 @@ window.addEventListener("open-auth-modal", () => {
   }
 });
 
-// Écouteur pour fermer la modale
+// Close the authentication modal.
 document.addEventListener("click", (event) => {
   if (
     event.target.matches(".close-auth-modal") ||
@@ -96,7 +106,7 @@ document.addEventListener("click", (event) => {
   }
 });
 
-// Composant Popup Auth
+// Authentication modal component.
 class AuthModal extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
@@ -104,40 +114,40 @@ class AuthModal extends HTMLElement {
         <div class="modal-content">
           <span class="close-btn">&times;</span>
 
-          <!-- Zone d'affichage des retours utilisateur -->
+          <!-- User feedback area -->
           <div id="auth-feedback" class="auth-feedback-msg hidden"></div>
 
-          <!-- Formulaire Login -->
+          <!-- Login form -->
           <div id="login-form-container">
-            <h2>Connexion</h2>
+            <h2>Log in</h2>
             <form id="login-form">
               <input type="email" placeholder="Email" required />
-              <input type="password" placeholder="Mot de passe" required />
-              <button type="submit">Se connecter</button>
+              <input type="password" placeholder="Password" required />
+              <button type="submit">LOG IN</button>
             </form>
-            <p>Pas encore de compte ? <button type="button" id="switch-to-register">S'inscrire</button></p>
+            <p>Don't have an account yet? <button type="button" id="switch-to-register">Sign up</button></p>
           </div>
 
-          <!-- Formulaire Register (Caché par défaut) -->
+          <!-- Registration form (hidden by default) -->
           <div id="register-form-container" class="hidden">
-            <h2>Inscription</h2>
+            <h2>Create an account</h2>
             <form id="register-form">
               <input type="email" id="reg-email" placeholder="Email" required />
-              <input type="password" id="reg-password" placeholder="Mot de passe" required />
-              <button type="submit">S'inscrire</button>
+              <input type="password" id="reg-password" placeholder="Password" required />
+              <button type="submit">CREATE ACCOUNT</button>
             </form>
-            <p>Déjà un compte ? <button type="button" id="switch-to-login">Se connecter</button></p>
+            <p>Already have an account? <button type="button" id="switch-to-login">Log in</button></p>
           </div>
 
-          <!-- Formulaire Code de Vérification (Caché par défaut) -->
+          <!-- Email verification form (hidden by default) -->
           <div id="verify-form-container" class="hidden">
-            <h2>Vérification Email</h2>
-            <p>Un code a été envoyé à votre adresse e-mail : <strong id="display-pending-email"></strong></p>
+            <h2>Verify your email</h2>
+            <p>A verification code has been sent to your email address: <strong id="display-pending-email"></strong></p>
             <form id="verify-form">
-              <input type="text" id="verify-code" placeholder="Code à 6 chiffres" maxlength="6" required />
-              <button type="submit">Valider le code</button>
+              <input type="text" id="verify-code" placeholder="6-digit code" maxlength="6" required />
+              <button type="submit">VERIFY CODE</button>
             </form>
-            <p>Vous n'avez pas reçu le code ? <button type="button" id="resend-code-btn">Renvoyer le code</button></p>
+            <p>Didn't receive the code? <button type="button" id="resend-code-btn">Resend code</button></p>
           </div>
 
         </div>
@@ -145,4 +155,5 @@ class AuthModal extends HTMLElement {
     `;
   }
 }
+
 customElements.define("auth-modal", AuthModal);
