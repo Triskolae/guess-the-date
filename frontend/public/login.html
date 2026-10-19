@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -23,27 +24,7 @@
   </head>
 
   <body class="login-page">
-    <button
-      class="auth-menu-toggle"
-      type="button"
-      aria-label="Open navigation"
-      aria-expanded="false"
-      aria-controls="auth-navigation"
-    >
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-
-    <nav
-      id="auth-navigation"
-      class="auth-navigation"
-      aria-label="Main navigation"
-    >
-      <a href="index.html">Home</a>
-      <a href="game.html" class="play-game">Play</a>
-      <a href="about.html">About</a>
-    </nav>
+    <app-header></app-header>
 
     <main class="auth-page">
       <section class="auth-panel">
@@ -206,5 +187,7 @@
     <script src="assets/components.js"></script>
     <script src="assets/auth.js"></script>
     <script src="assets/login.js"></script>
+
   </body>
+
 </html>

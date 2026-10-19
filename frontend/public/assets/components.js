@@ -1,4 +1,3 @@
-
 class AppHeader extends HTMLElement {
   connectedCallback() {
     this.render();
@@ -34,6 +33,7 @@ class AppHeader extends HTMLElement {
           </li>
           <li class="nav-account-item" hidden><a href="account.html">Account</a></li>
           <li class="nav-login-item"><a href="login.html">Log in</a></li>
+          <li class="nav-logout-item" hidden><a href="index.html" class="logout-button">Log out</a></li>
           </ul>
         </nav>
       </header>
@@ -46,6 +46,7 @@ class AppHeader extends HTMLElement {
 
       const accountItem = this.querySelector(".nav-account-item");
       const loginItem = this.querySelector(".nav-login-item");
+      const logoutItem = this.querySelector(".nav-logout-item");
 
       try {
         const user = await window.checkAuthStatus();
@@ -53,9 +54,11 @@ class AppHeader extends HTMLElement {
 
         accountItem.hidden = !user;
         loginItem.hidden = Boolean(user);
+        logoutItem.hidden = !user;
       } catch (error) {
         accountItem.hidden = true;
         loginItem.hidden = false;
+        logoutItem.hidden = true;
       }
     };
 
@@ -65,8 +68,24 @@ class AppHeader extends HTMLElement {
       updateAuthNavigation();
     }
 
+    const currentPage = window.location.pathname.split("/").pop() || "index.html";
+    this.querySelectorAll(".main-nav a").forEach(link => {
+      const targetPage = ["account.html", "badges.html", "settings.html"].includes(currentPage)
+        ? "account.html"
+        : currentPage;
+      if (link.getAttribute("href") === targetPage && !link.classList.contains("logout-button")) {
+        link.setAttribute("aria-current", "page");
+      }
+    });
+
     const toggle = this.querySelector(".game-menu-toggle");
     const nav = this.querySelector(".main-nav");
+
+    const closeMenu = () => {
+      nav.classList.remove("game-nav-open");
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-label", "Open menu");
+    };
 
     toggle?.addEventListener("click", () => {
       const isOpen = nav.classList.toggle("game-nav-open");
@@ -76,9 +95,14 @@ class AppHeader extends HTMLElement {
 
     document.addEventListener("click", (event) => {
       if (!this.contains(event.target) && nav.classList.contains("game-nav-open")) {
-        nav.classList.remove("game-nav-open");
-        toggle?.setAttribute("aria-expanded", "false");
+        closeMenu();
       }
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") closeMenu();
+    });
+    nav.addEventListener("click", event => {
+      if (event.target.closest("a")) closeMenu();
     });
   }
 }
