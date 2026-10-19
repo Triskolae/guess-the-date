@@ -1,4 +1,8 @@
-const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const {
+  S3Client,
+  DeleteObjectCommand,
+  ListObjectsV2Command,
+} = require("@aws-sdk/client-s3");
 const { Upload } = require("@aws-sdk/lib-storage");
 
 // Configuration du client R2 via S3Client
@@ -48,7 +52,45 @@ async function deleteFromR2(fileName) {
   await s3Client.send(command);
 }
 
+/**
+ * Récupère tous les objets du bucket R2
+ */
+async function listObjectsFromR2(options) {
+  const { api_name, version } = options;
+  // Vérification du format de version
+  if (!/^v\d+$/.test(version)) {
+    throw new Error("Version invalide");
+  }
+
+  const objects = [];
+  let continuationToken;
+
+  // Filtre sur le dossier de la version demandée
+  const prefix = `game_objects/${api_name}/${version}/objects/`;
+
+  do {
+    const command = new ListObjectsV2Command({
+      Bucket: process.env.R2_BUCKET_NAME,
+      Prefix: prefix,
+      ContinuationToken: continuationToken,
+    });
+
+    const response = await s3Client.send(command);
+
+    objects.push(...(response.Contents || []));
+    continuationToken = response.NextContinuationToken;
+  } while (continuationToken);
+
+  return objects.map((object) => ({
+    key: object.Key,
+    url: `${process.env.R2_PUBLIC_URL}/${object.Key}`,
+    size: object.Size,
+    lastModified: object.LastModified,
+  }));
+}
+
 module.exports = {
   uploadToR2,
   deleteFromR2,
+  listObjectsFromR2,
 };

@@ -618,7 +618,6 @@ async function importCategory(
   for (const query of shuffledQueries) {
     if (imported >= config.quota) break;
 
-    let importedForQuery = 0;
     let candidatesForQuery = 0;
 
     console.log(`Recherche : ${query}`);
@@ -628,7 +627,6 @@ async function importCategory(
       let offset = 0;
       offset < 1000 &&
       imported < config.quota &&
-      importedForQuery < 2 &&
       candidatesForQuery < MAX_CANDIDATES_PER_QUERY;
       offset += 100
     ) {
@@ -648,7 +646,6 @@ async function importCategory(
       for (const id of ids) {
         if (
           imported >= config.quota ||
-          importedForQuery >= 2 ||
           candidatesForQuery >= MAX_CANDIDATES_PER_QUERY
         ) {
           break;
@@ -660,7 +657,7 @@ async function importCategory(
           `[${config.slug}] candidat #${processed} — ID Met ${id} — ` +
             `importés ${imported}/${config.quota}, rejetés ${rejected}`,
         );
-        if (imported >= config.quota || importedForQuery >= 2) break;
+        if (imported >= config.quota) break;
         if (seenIds.has(id)) continue;
 
         seenIds.add(id);
@@ -802,7 +799,6 @@ async function importCategory(
           });
 
           imported++;
-          importedForQuery++;
 
           console.log(
             `✓ ${title} | ${date.yearStart}–${date.yearEnd} | ` +
@@ -820,8 +816,7 @@ async function importCategory(
     }
     log(
       `FIN RECHERCHE "${query}" — ` +
-        `${candidatesForQuery} candidats examinés, ` +
-        `${importedForQuery} importé(s)`,
+        `${candidatesForQuery} candidats examinés.`,
     );
   }
 

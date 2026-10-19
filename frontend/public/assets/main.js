@@ -299,9 +299,9 @@ function updateTimelineRange() {
     minYear = maxYear - zoomStep;
   }
 
-  // Blocage à -3000 minimum
+  // Blocage à -3000 minimum, current year max
   timelineMinYear = Math.max(MIN_TIMELINE_YEAR, minYear);
-  timelineMaxYear = maxYear;
+  timelineMaxYear = Math.min(DEFAULT_TIMELINE_MAX_YEAR, maxYear);
 }
 
 function ensureGuessIsVisible(userAnswer) {
@@ -384,9 +384,9 @@ function ensureGuessIsVisible(userAnswer) {
       maxYear - newRange;
   }
 
-  // Blocage à -3000 minimum
+  // Blocage à -3000 minimum, current year max
   timelineMinYear = Math.max(MIN_TIMELINE_YEAR, minYear);
-  timelineMaxYear = maxYear;
+  timelineMaxYear = Math.min(DEFAULT_TIMELINE_MAX_YEAR, maxYear);
 }
 
 function formatTimelineYear(year) {
