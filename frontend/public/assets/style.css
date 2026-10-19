@@ -3767,7 +3767,7 @@ body.onboarding,
 }
 
 /* Shared Game burger on all pages — closed glass / opened Game layout. */
-body:not(.home-page) .site-header {
+body:not(.home-page):not(.page-game) .site-header {
   position: relative;
   z-index: 150;
 }
