@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Onboarding</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fondamento:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="assets/style.css" />
   </head>
   <body class="onboarding">
@@ -14,23 +20,23 @@
         </header>
         <form id="onboarding-form">
           <section id="step-1" class="onboarding-step">
-            <h2>Choisissez votre mode de jeu</h2>
+            <h2>Choose your game mode</h2>
             <div class="options-grid">
               <label class="option-card">
                 <input type="radio" name="game_mode" value="casual" checked />
                 <div class="card-content">
-                  <span class="card-title">Détente</span>
+                  <span class="card-title">Casual</span>
                   <span class="card-subtitle"
-                    >Jouez sans pression et à votre rythme</span
+                    >Play at your own pace, without pressure</span
                   >
                 </div>
               </label>
               <label class="option-card">
                 <input type="radio" name="game_mode" value="competitive" />
                 <div class="card-content">
-                  <span class="card-title">Compétitif</span>
+                  <span class="card-title">Competitive</span>
                   <span class="card-subtitle"
-                    >Parties chronométrées et classement</span
+                    >Timed games and leaderboards</span
                   >
                 </div>
               </label>
@@ -41,13 +47,13 @@
                 class="button button-primary"
                 id="btn-to-step-2"
               >
-                Suivant
+                NEXT
               </button>
             </div>
           </section>
 
           <section id="step-2" class="onboarding-step hidden">
-            <h2>Choisissez votre époque principale</h2>
+            <h2>Choose your preferred era</h2>
             <div id="eras-container" class="options-grid"></div>
             <div class="step-actions">
               <button
@@ -55,21 +61,21 @@
                 class="button button-secondary"
                 id="btn-back-to-1"
               >
-                Retour
+                BACK
               </button>
               <button
                 type="button"
                 class="button button-primary"
                 id="btn-to-step-3"
               >
-                Suivant
+                NEXT
               </button>
             </div>
           </section>
 
           <section id="step-3" class="onboarding-step hidden">
-            <h2>Choisissez vos thématiques (3 max)</h2>
-            <p class="step-hint">Sélectionnez jusqu'à 3 catégories.</p>
+            <h2>Choose your topics (max. 3)</h2>
+            <p class="step-hint">Select up to 3 categories.</p>
             <div id="categories-container" class="options-grid"></div>
             <div class="step-actions">
               <button
@@ -77,23 +83,21 @@
                 class="button button-secondary"
                 id="btn-back-to-2"
               >
-                Retour
+                BACK
               </button>
               <button type="submit" class="button button-primary">
-                Valider mes choix
+                CONFIRM MY CHOICES
               </button>
             </div>
           </section>
 
           <section id="step-4" class="onboarding-step hidden">
-            <h2>Configuration terminée !</h2>
-            <p>Vos préférences ont bien été enregistrées.</p>
+            <h2>Setup complete!</h2>
+            <p>Your preferences have been saved.</p>
             <div class="step-actions final-actions">
-              <a href="index.html" class="button button-secondary"
-                >Page d'accueil</a
-              >
+              <a href="index.html" class="button button-secondary">HOME</a>
               <a href="game.html" class="button button-primary"
-                >Lancer une partie</a
+                >START PLAYING</a
               >
             </div>
           </section>
