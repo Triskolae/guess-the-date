@@ -1,7 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
   // --- ÉLÉMENTS DOM ---
-  const menuToggle = document.querySelector(".auth-menu-toggle");
-  const navigation = document.querySelector(".auth-navigation");
   const loginTab = document.querySelector("#login-tab");
   const registerTab = document.querySelector("#register-tab");
   const loginPanel = document.querySelector("#login-panel");
@@ -89,17 +87,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // --- NAVIGATION & ONGLETS ---
-  if (menuToggle && navigation) {
-    menuToggle.addEventListener("click", () => {
-      const isOpen = navigation.classList.toggle("open");
-      menuToggle.setAttribute("aria-expanded", isOpen);
-      menuToggle.setAttribute(
-        "aria-label",
-        isOpen ? "Close navigation" : "Open navigation",
-      );
-    });
-  }
-
   if (loginTab && registerTab) {
     loginTab.addEventListener("click", () =>
       showAuthPanel(loginTab, loginPanel, registerTab, registerPanel),
