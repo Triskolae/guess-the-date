@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const { uploadToR2 } = require("../services/r2.service");
+const { uploadToR2, listObjectsFromR2 } = require("../services/r2.service");
 
 const router = express.Router();
 
@@ -23,7 +23,7 @@ router.post("/upload", upload.single("image"), async (req, res) => {
     const imageUrl = await uploadToR2(
       req.file.buffer,
       fileKey,
-      req.file.mimetype
+      req.file.mimetype,
     );
 
     return res.json({
@@ -32,7 +32,29 @@ router.post("/upload", upload.single("image"), async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur upload R2 :", error);
-    return res.status(500).json({ error: "Erreur lors de l'envoi de l'image." });
+    return res
+      .status(500)
+      .json({ error: "Erreur lors de l'envoi de l'image." });
+  }
+});
+
+/**
+ * req.params: { api_name, version }
+ */
+router.get("/:api_name/:version", async (req, res) => {
+  try {
+    const objects = await listObjectsFromR2(req.params);
+
+    return res.json({
+      count: objects.length,
+      objects,
+    });
+  } catch (error) {
+    console.error("Erreur récupération R2 :", error);
+
+    return res.status(500).json({
+      error: "Erreur lors de la récupération des objets.",
+    });
   }
 });
 

@@ -152,9 +152,9 @@
 
         <!-- Formulaire de Vérification (affiché après inscription) -->
         <div id="verify-form-container" class="hidden">
-          <h2>Vérification Email</h2>
+          <h2>Verify your email</h2>
           <p>
-            Un code a été envoyé à votre adresse e-mail :
+            A verification code has been sent to your email address:
             <strong id="display-pending-email"></strong>
           </p>
           <form id="verify-form" class="auth-form">
@@ -162,18 +162,18 @@
               <input
                 type="text"
                 id="verify-code"
-                placeholder="Code à 6 chiffres"
+                placeholder="6-digit code"
                 maxlength="6"
                 required
               />
             </div>
             <button type="submit" class="button button-primary">
-              Valider le code
+              VERIFY CODE
             </button>
           </form>
           <p>
-            Vous n'avez pas reçu le code ?
-            <button type="button" id="resend-code-btn">Renvoyer le code</button>
+            Didn't receive the code?
+            <button type="button" id="resend-code-btn">Resend code</button>
           </p>
         </div>
 
