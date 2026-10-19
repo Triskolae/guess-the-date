@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en">
+
   <head>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -11,41 +13,28 @@
 
     <title>My Account | Guess the Date</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <link
       href="https://fonts.googleapis.com/css2?family=Beau+Rivage&family=Cormorant+Infant:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Eagle+Lake&family=Fondamento:ital@0;1&family=Great+Vibes&family=Imperial+Script&family=Italianno&family=MonteCarlo&family=Quintessential&family=Updock&display=swap"
       rel="stylesheet"
-    >
+    />
 
     <link rel="stylesheet" href="assets/style.css" />
+
   </head>
 
   <body class="account-body">
-    <header class="site-header">
-      <a href="index.html" class="site-logo" aria-label="Guess the Date — Home">
-        <picture>
-          <source media="(max-width: 600px)" srcset="ressources-design/LOOP_GuessTheDate_DoreeBlue.png" />
-          <img src="ressources-design/LOGO_GuessTheDate_DoreeBleu.png" alt="Guess the Date" />
-        </picture>
-      </a>
-      <button class="auth-menu-toggle about-menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="about-navigation">
-        <span></span><span></span><span></span>
-      </button>
-      <nav id="about-navigation" class="auth-navigation about-navigation" aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a href="game.html" class="play-game">Play</a>
-        <a href="about.html">About</a>
-        <a href="login.html">Log in</a>
-      </nav>
-    </header>
+
+    <app-header></app-header>
 
     <main class="account-page">
       <header class="account-header">
         <h1>My account</h1>
 
         <p>Track your progress and explore your achievements.</p>
+
       </header>
 
       <nav class="account-nav" aria-label="Account navigation">
@@ -67,23 +56,67 @@
 
         <div class="profile-photo-control">
           <div class="profile-avatar-medallion">
-            <span class="profile-avatar-ornament ornament-top-left" aria-hidden="true">❧</span>
-            <span class="profile-avatar-ornament ornament-top-right" aria-hidden="true">❧</span>
-            <span class="profile-avatar-ornament ornament-bottom-left" aria-hidden="true">❧</span>
-            <span class="profile-avatar-ornament ornament-bottom-right" aria-hidden="true">❧</span>
+            <span
+              class="profile-avatar-ornament ornament-top-left"
+              aria-hidden="true"
+              >❧</span
+            >
+            <span
+              class="profile-avatar-ornament ornament-top-right"
+              aria-hidden="true"
+              >❧</span
+            >
+            <span
+              class="profile-avatar-ornament ornament-bottom-left"
+              aria-hidden="true"
+              >❧</span
+            >
+            <span
+              class="profile-avatar-ornament ornament-bottom-right"
+              aria-hidden="true"
+              >❧</span
+            >
             <div class="profile-avatar-frame">
-              <span class="profile-avatar-placeholder" id="profile-avatar-placeholder" aria-hidden="true">P</span>
-              <img class="profile-avatar-image hidden" id="profile-avatar-image" alt="Profile photo" />
+              <span
+                class="profile-avatar-placeholder"
+                id="profile-avatar-placeholder"
+                aria-hidden="true"
+                >P</span
+              >
+              <img
+                class="profile-avatar-image hidden"
+                id="profile-avatar-image"
+                alt="Profile photo"
+              />
             </div>
           </div>
+
           <div class="profile-photo-actions">
             <strong>Profile photo</strong>
-            <input class="profile-photo-input" id="profile-photo-input" type="file" accept="image/*" />
+            <input
+              class="profile-photo-input"
+              id="profile-photo-input"
+              type="file"
+              accept="image/*"
+            />
             <div class="profile-photo-buttons">
-              <label class="profile-photo-button" for="profile-photo-input">Choose photo</label>
-              <button class="profile-photo-remove hidden" id="profile-photo-remove" type="button">Remove</button>
+              <label class="profile-photo-button" for="profile-photo-input"
+                >Choose photo</label
+              >
+              <button
+                class="profile-photo-remove hidden"
+                id="profile-photo-remove"
+                type="button"
+              >
+                Remove
+              </button>
             </div>
-            <p class="profile-photo-feedback" id="profile-photo-feedback" role="status" aria-live="polite"></p>
+            <p
+              class="profile-photo-feedback"
+              id="profile-photo-feedback"
+              role="status"
+              aria-live="polite"
+            ></p>
           </div>
         </div>
 
@@ -136,9 +169,11 @@
 
         <a href="game.html" class="play-game button button-primary"> Play </a>
       </section>
+
     </main>
 
     <footer class="site-footer">
+
       <nav aria-label="Footer navigation">
         <a href="index.html">Home</a>
         <a href="about.html">About</a>
@@ -153,7 +188,8 @@
     <script src="assets/auth.js"></script>
     <script src="assets/config.js"></script>
     <script type="module" src="assets/auth_needed.js"></script>
-    <script src="assets/account-navigation.js"></script>
     <script src="assets/account-profile-photo.js"></script>
+
   </body>
+
 </html>
